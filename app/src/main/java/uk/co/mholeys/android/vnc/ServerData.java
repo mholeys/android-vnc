@@ -25,6 +25,7 @@ public class ServerData implements IConnectionInformation {
     private PixelFormat format = PixelFormat.DEFAULT_FORMAT;
     private EncodingSettings encodingSettings = EncodingSettings.DEFAULT_ENCODINGS;
 
+    public String name;
     public String address;
     public int port;
     public String password;
@@ -34,7 +35,7 @@ public class ServerData implements IConnectionInformation {
     public ServerData() {}
 
     public String toString() {
-        return address + ":" + port;
+        return name + "\n" + address + ":" + port;
     }
 
     @Override

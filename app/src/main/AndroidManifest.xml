@@ -29,6 +29,7 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="uk.co.mholeys.android.vnc.ServerList" />
         </activity>
+        <activity android:name=".AddServerActivity"></activity>
     </application>
 
 </manifest>
