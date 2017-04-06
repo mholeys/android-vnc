@@ -1,21 +1,14 @@
 package uk.co.mholeys.android.vnc;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.Looper;
 import android.support.v4.view.MotionEventCompat;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
-import android.text.Layout;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
@@ -23,11 +16,12 @@ import uk.co.mholeys.android.vnc.display.AndroidScreen;
 import uk.co.mholeys.android.vnc.input.AndroidKeyboard;
 import uk.co.mholeys.android.vnc.input.AndroidMouse;
 import uk.co.mholeys.vnc.VNCConnectionException;
+import uk.co.mholeys.vnc.data.Encoding;
+import uk.co.mholeys.vnc.data.EncodingSettings;
 import uk.co.mholeys.vnc.log.Logger;
 import uk.co.mholeys.vnc.net.VNCProtocol;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.InetAddress;
 
 import uk.co.mholeys.android.vnc.display.AndroidDisplay;
@@ -55,14 +49,16 @@ public class VncActivity extends AppCompatActivity {
     float lastX = 0;
     float lastY = 0;
 
-    double xOffset = 0;
-    double yOffset = 0;
+    double differenceX;
+    double differenceY;
+
     double scale = 1;
 
     boolean click = false;
     boolean left = false;
     boolean right = false;
     int clickCount = 0;
+    long lastClick = 0;
 
     static ScaleGestureDetector scaleDetector;
 
@@ -70,6 +66,11 @@ public class VncActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_vnc);
+
+        final Logger logger = new Logger(new LoggerOutStream());
+        logger.logLevel = Logger.LOG_LEVEL_NORMAL;
+
+        final Activity activity = this;
 
         mDecorView = getWindow().getDecorView();
         scaleDetector = new ScaleGestureDetector(getApplicationContext(), new ScaleListener());
@@ -100,16 +101,28 @@ public class VncActivity extends AppCompatActivity {
         }
 
         if (connection.getAddress() == null) {
-            Logger.logger.printLn("Failed to connect to host");
-            Toast.makeText(this, "Failed to connect to host", Toast.LENGTH_LONG);
+            //Logger.logger.printLn("Failed to connect to host");
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(activity, "Failed to connect to host", Toast.LENGTH_LONG);
+                }
+            });
             mReady = false;
         }
 
         final ServerData connection = this.connection;
-        final Logger logger = new Logger(new LoggerOutStream());
-        logger.logLevel = Logger.LOG_LEVEL_NORMAL;
+        EncodingSettings preferedEncoding = new EncodingSettings()
+                .addEncoding(Encoding.TIGHT_ENCODING)
+                .addEncoding(Encoding.ZLIB_ENCODING)
+                .addEncoding(Encoding.CORRE_ENCODING)
+                .addEncoding(Encoding.RRE_ENCODING)
+                .addEncoding(Encoding.RAW_ENCODING)
+                .addEncoding(Encoding.JPEG_QUALITY_LEVEL_1_PSEUDO_ENCODING)
+                .addEncoding(Encoding.COMPRESSION_LEVEL_0_PSEUDO_ENCODING)
+                .addEncoding(Encoding.CURSOR_PSEUDO_ENCODING);
+        connection.setPrefferedEncoding(preferedEncoding);
 
-        final Activity activity = this;
 
         androidInterface = new AndroidInterface(this, new AndroidDisplay(activity, null));
         mouse = (AndroidMouse) androidInterface.getMouseManager();
@@ -153,6 +166,12 @@ public class VncActivity extends AppCompatActivity {
             mProtoThread.start();
             androidInterface.display.setLayoutParams(new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT));
             layout.addView(androidInterface.display);
+            androidInterface.display.setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    return onTouchEvent(event);
+                }
+            });
         }
     }
 
@@ -164,6 +183,14 @@ public class VncActivity extends AppCompatActivity {
         int pointerCount = event.getPointerCount();
         int id = MotionEventCompat.getActionIndex(event);
         final int pointerIndex = MotionEventCompat.getActionIndex(event);
+
+        long sinceLast = lastClick - System.currentTimeMillis();
+        lastClick = System.currentTimeMillis();
+        if (sinceLast > 200) {
+            Logger.logger.printLn("Reset click count was: " + clickCount);
+            clickCount = 0;
+        }
+
         switch (action) {
             case (MotionEvent.ACTION_DOWN):
                 if (pointerCount == 1) {
@@ -172,13 +199,13 @@ public class VncActivity extends AppCompatActivity {
                     click = true;
                     clickCount++;
                 }
-                if (pointerCount == 2) {
+                /*if (pointerCount == 2) {
                     lastScrollX = event.getX(pointerIndex);
                     lastScrollY = event.getY(pointerIndex);
-                }
+                }*/
                 break;
             case (MotionEvent.ACTION_POINTER_DOWN):
-                if (pointerCount == 4) {
+                /*if (pointerCount == 4) {
                     //Toggle keyboard
                     if (keyboardState) {
                         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
@@ -187,10 +214,26 @@ public class VncActivity extends AppCompatActivity {
                     }
                     Logger.logger.printLn("Toggled keyboard");
                     keyboardState = !keyboardState;
-                }
+                }*/
                 break;
             case (MotionEvent.ACTION_MOVE):
                 if (pointerCount == 1) {
+                    if (clickCount == 1) {
+                        click = false;
+                    }
+                    differenceX = lastX - event.getX();
+                    differenceY = lastY - event.getY();
+                    lastX = event.getX();
+                    lastY = event.getY();
+                    if (clickCount == 2) {
+                        mouse.localX -= differenceX;
+                        mouse.localY -= differenceY;
+                        mouse.left = click;
+                        mouse.right = false;
+                        mouse.addToQueue();
+                    }
+                }
+                /*if (pointerCount == 1) {
                     float x = event.getX(pointerIndex);
                     float y = event.getY(pointerIndex);
 
@@ -228,18 +271,31 @@ public class VncActivity extends AppCompatActivity {
                     screen.cutX = 0;
                     screen.cutY = 0;
                     screen.update();
-                }
+                }*/
                 scaleDetector.onTouchEvent(event);
                 break;
             case (MotionEvent.ACTION_UP):
+                differenceX = lastX - event.getX();
+                differenceY = lastY - event.getY();
                 if (click) {
-                    mouse.left = left;
-                    mouse.right = right;
+                    if (clickCount == 1) {
+                        mouse.localX -= differenceX;
+                        mouse.localY -= differenceY;
+                        mouse.left = true;
+                        mouse.right = false;
+                        mouse.addToQueue();
+                    } else if (clickCount == 3) {
+                        mouse.localX -= differenceX;
+                        mouse.localY -= differenceY;
+                        mouse.left = false;
+                        mouse.right = true;
+                        mouse.addToQueue();
+                    }
                     click = false;
                     clickCount = 0;
-                    left = false;
-                    right = false;
                 }
+                mouse.left = false;
+                mouse.right = false;
                 mouse.addToQueue();
                 break;
             case (MotionEvent.ACTION_CANCEL):
@@ -283,21 +339,9 @@ public class VncActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        protocol.disconnect();
+        try {
+            protocol.disconnect();
+        } catch (Exception e) { }
     }
 }
 
-class LoggerOutStream extends OutputStream {
-
-    String message = "";
-
-    public void write(int i) {
-        if (i == '\n') {
-            Log.e("Logger", message);
-            message = "";
-        } else {
-            message += (char)i;
-        }
-    }
-
-}

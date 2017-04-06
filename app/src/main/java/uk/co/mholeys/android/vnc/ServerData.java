@@ -1,9 +1,6 @@
 package uk.co.mholeys.android.vnc;
 
 import android.os.AsyncTask;
-import android.os.Parcel;
-import android.os.Parcelable;
-import android.widget.Toast;
 
 import uk.co.mholeys.vnc.data.EncodingSettings;
 import uk.co.mholeys.vnc.data.PixelFormat;
@@ -14,8 +11,6 @@ import uk.co.mholeys.vnc.log.Logger;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-
-import javax.xml.transform.Result;
 
 /**
  * Created by Matthew on 25/09/2016.
@@ -82,6 +77,10 @@ public class ServerData implements IConnectionInformation {
         return format;
     }
 
+    public void setPrefferedFormat(PixelFormat format) {
+        this.format = format;
+    }
+
     @Override
     public boolean hasPrefferedEncoding() {
         return encodingSettings != null;
@@ -90,6 +89,10 @@ public class ServerData implements IConnectionInformation {
     @Override
     public EncodingSettings getPrefferedEncoding() {
         return encodingSettings;
+    }
+
+    public void setPrefferedEncoding(EncodingSettings encodingSettings) {
+        this.encodingSettings = encodingSettings;
     }
 
     @Override

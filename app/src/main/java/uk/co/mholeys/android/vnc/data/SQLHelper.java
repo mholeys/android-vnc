@@ -14,8 +14,8 @@ import uk.co.mholeys.android.vnc.ServerData;
 public class SQLHelper extends SQLiteOpenHelper {
 
     private static final int DATABASE_VERSION = 2;
-    public static final String DATABASE_NAME = "sample_database";
-    public static final String SERVERS_TABLE_NAME = "person";
+    public static final String DATABASE_NAME = "server_database";
+    public static final String SERVERS_TABLE_NAME = "servers";
     public static final String SERVER_COLUMN_ID = "_id";
     public static final String SERVER_COLUMN_NAME = "name";
     public static final String SERVER_COLUMN_ADDRESS = "address";

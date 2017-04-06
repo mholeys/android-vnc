@@ -30,28 +30,24 @@ public class AndroidScreen implements IScreen {
     public double cutHeight = 0;
     public float cutX = 0;
     public float cutY = 0;
+    int[] pixels;
 
     public AndroidScreen(int width, int height) {
-        bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         setSize(width, height);
     }
 
     @Override
     public void drawPixels(int x, int y, int width, int height, int[] pixels) {
-        //synchronized (bitmap) {
-        Canvas canvas = new Canvas(bitmap);
         for (int yA = y; yA < y + height; yA++) {
             for (int xA = x; xA < x + width; xA++) {
-                //canvas.drawRect(xA, yA, 1, 1, new Paint(pixels[(xA - x) + ((yA - y) * width)]));
                 bitmap.setPixel(xA, yA, pixels[(xA - x) + ((yA - y) * width)]);
             }
-        };
-        //}
+        }
+        Logger.logger.printLn(""+(bitmap.getPixel(x, y) + " " + (pixels[0])));
     }
 
     @Override
     public void drawPalette(int x, int y, int width, int height, int[] palette, int paletteSize, byte[] data) {
-        //synchronized (bitmap) {
         Canvas canvas = new Canvas(bitmap);
         if (2 == paletteSize) {
             int dx, dy, n;
@@ -65,10 +61,13 @@ public class AndroidScreen implements IScreen {
                     for (n = 7; n >= 0; n--) {
                         x = i % this.width;
                         y = i / this.width;
+                        //canvas.drawPoint(x, y, new Paint(0xFF000000 | palette[b >> n & 1]));
+                        //canvas.drawRect(x, y, 1, 1, new Paint(palette[b >> n & 1]));
                         bitmap.setPixel(x, y, palette[b >> n & 1]);
                     }
                 }
                 for (n = 7; n >= 8 - width % 8; n--) {
+                    //canvas.drawPoint(x, y, new Paint(0xFF000000 | palette[data[dy * rowBytes + dx] >> n & 1]));
                     //canvas.drawRect(x, y, 1, 1, new Paint(palette[data[dy * rowBytes + dx] >> n & 1]));
                     bitmap.setPixel(x, y, palette[data[dy * rowBytes + dx] >> n & 1]);
                 }
@@ -80,12 +79,12 @@ public class AndroidScreen implements IScreen {
             for (int ly = y; ly < y + height; ++ly) {
                 for (int lx = x; lx < x + width; ++lx) {
                     int d = data[i++] & 0xFF;
+                    //canvas.drawPoint(lx, ly, new Paint(0xFF000000 | palette[d]));
                     //canvas.drawRect(lx, ly, 1, 1, new Paint(palette[d]));
                     bitmap.setPixel(lx, ly, palette[d]);
                 }
             }
         }
-        //}
     }
 
     @Override
@@ -94,17 +93,26 @@ public class AndroidScreen implements IScreen {
         Bitmap jpeg = BitmapFactory.decodeByteArray(data, 0, data.length);
         Canvas canvas = new Canvas(bitmap);
         canvas.drawBitmap(jpeg, x, y, new Paint());
+        jpeg.recycle();
+
         //}
     }
 
     @Override
     public void copyPixels(int x, int y, int width, int height, int srcX, int srcY) {
         //synchronized (bitmap) {
-        for (int yA = y; yA < y + height; yA++) {
+        Canvas canvas = new Canvas(bitmap);
+        int[] copied = new int[ width * height];
+        bitmap.getPixels(copied, 0, bitmap.getWidth(), x, y, width, height);
+        Bitmap sub = Bitmap.createBitmap(copied, 0, width, width, height, Bitmap.Config.ARGB_8888);
+        canvas.drawBitmap(sub, x, y, new Paint());
+        /*for (int yA = y; yA < y + height; yA++) {
             for (int xA = x; xA < x + width; xA++) {
+
                 bitmap.setPixel(xA, yA, bitmap.getPixel(srcX + xA - x, srcY + yA - y));
             }
-        }
+        }*/
+
         //}
     }
 
@@ -112,68 +120,11 @@ public class AndroidScreen implements IScreen {
     public void fillPixels(int x, int y, int width, int height, int color) {
         //synchronized (bitmap) {
         Canvas canvas = new Canvas(bitmap);
-        canvas.drawRect(x, y, width, height, new Paint(color));
+        Paint c = new Paint();
+        c.setColor(color);
+        canvas.drawRect(x, y, width, height, c);
         //}
     }
-
-    /*public void update() {
-        if (surfaceHolder.getSurface().isValid()) {
-            Log.d("Canvas", "Drew");
-            Canvas canvas = surfaceHolder.lockCanvas();
-            if (canvas == null) {
-                return;
-            }
-            if (bitmap == null) {
-                bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-            } else {
-                canvas.drawRect(0, 0, canvas.getWidth(), canvas.getHeight(), new Paint(Color.BLACK));
-                int scaledWidth, scaledHeight;
-                float scale;
-                Point displaySize = new Point();
-                presentation.getDisplay().getSize(displaySize);
-                float displayWidth = displaySize.x;
-                float displayHeight = displaySize.y;
-                float wScale = displayWidth / width;
-                float hScale = displayHeight / height;
-
-                if (Float.isInfinite(wScale) || Float.isInfinite(hScale)) {
-                    wScale = 1;
-                    hScale = 1;
-                }
-                float xOffset = 0;
-                float yOffset = 0;
-                if (wScale < hScale) {
-                    scale = wScale;
-                    yOffset = (displayHeight - (height*wScale)) / 2;
-                } else {
-                    scale = hScale;
-                    xOffset = (displayWidth - (width*hScale)) / 2;
-                }
-                scale *= zoomScale;
-
-                int xLimit = (int)(0.9 * width*scale);
-                int yLimit = (int)(0.9 * height*scale);
-
-                if (cutX < 0.03*xLimit && cutX > -0.03*xLimit) cutX = 0;
-                if (cutY < 0.03*yLimit && cutY > -0.03*yLimit) cutY = 0;
-
-                if (cutX < -xLimit) cutX = -xLimit;
-                if (cutX > xLimit) cutX = xLimit;
-
-                if (cutY < -yLimit) cutY = -yLimit;
-                if (cutY > yLimit) cutY = yLimit;
-
-                Matrix scaleMatrix = new Matrix();
-                Matrix canvasMatrix = new Matrix();
-                canvasMatrix.setTranslate(xOffset + cutX, yOffset + cutY);
-                scaleMatrix.setScale(scale, scale);
-                canvas.setMatrix(canvasMatrix);
-                canvas.drawBitmap(bitmap, scaleMatrix, new Paint());
-                //canvas.drawRect(presentation.vncSurface.getMouseManager().remoteX, presentation.vncSurface.getMouseManager().remoteY, 5, 5, new Paint(Color.GREEN));
-            }
-            surfaceHolder.unlockCanvasAndPost(canvas);
-        }
-    }*/
 
     public void update() {
         display.invalidate();
@@ -189,6 +140,8 @@ public class AndroidScreen implements IScreen {
         this.width = width;
         this.height = height;
         bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        bitmap.setHasAlpha(false);
+        pixels = new int[width * height];
     }
 
     @Override
@@ -202,19 +155,26 @@ public class AndroidScreen implements IScreen {
     }
 
     @Override
-    public void drawCursor(int x, int y, int i2, int i3, byte[] bytes) {
-
+    public void drawCursor(int x, int y, int w, int h, byte[] bytes) {
+        Canvas canvas = new Canvas(bitmap);
+        Paint cursor = new Paint();
+        cursor.setColor(0xFF00FF);
+        canvas.drawRect(x, y, w, h, cursor);
     }
 
     public void process() {
         while (updateManager.hasUpdates()) {
-            Logger.logger.printLn("Has updates");
             ScreenUpdate update = updateManager.getUpdate();
             if (update == null) continue;
             int x = update.x;
             int y = update.y;
+            int w = update.width;
+            int h = update.height;
+            Logger.logger.printLn(update.getClass().toString() + " x:" + x + " y:" + y + " w:" + w + " h:" + h);
+
             int width = update.width;
             int height = update.height;
+            bitmap.prepareToDraw();
             if (update instanceof RawScreenUpdate) {
                 RawScreenUpdate raw = (RawScreenUpdate) update;
                 drawPixels(x, y, width, height, raw.pixels);

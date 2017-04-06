@@ -1,13 +1,10 @@
 package uk.co.mholeys.android.vnc.display;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
-import android.graphics.Point;
-import android.util.Log;
 import android.widget.ImageView;
 
 import uk.co.mholeys.android.vnc.input.AndroidMouse;
