@@ -21,7 +21,7 @@ public class AndroidInterface implements IUserInterface {
     private UpdateManager updateManager;
     Context context;
     AndroidKeyboard keyboard = new AndroidKeyboard();
-    AndroidMouse mouse = new AndroidMouse();
+    AndroidMouse mouse = new AndroidMouse(this);
 
     public AndroidInterface(Context context, AndroidDisplay display) {
         this.context = context;

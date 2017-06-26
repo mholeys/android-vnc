@@ -43,12 +43,10 @@ public class AndroidScreen implements IScreen {
                 bitmap.setPixel(xA, yA, pixels[(xA - x) + ((yA - y) * width)]);
             }
         }
-        Logger.logger.printLn(""+(bitmap.getPixel(x, y) + " " + (pixels[0])));
     }
 
     @Override
     public void drawPalette(int x, int y, int width, int height, int[] palette, int paletteSize, byte[] data) {
-        Canvas canvas = new Canvas(bitmap);
         if (2 == paletteSize) {
             int dx, dy, n;
             int i = y * this.width + x;
@@ -61,14 +59,10 @@ public class AndroidScreen implements IScreen {
                     for (n = 7; n >= 0; n--) {
                         x = i % this.width;
                         y = i / this.width;
-                        //canvas.drawPoint(x, y, new Paint(0xFF000000 | palette[b >> n & 1]));
-                        //canvas.drawRect(x, y, 1, 1, new Paint(palette[b >> n & 1]));
                         bitmap.setPixel(x, y, palette[b >> n & 1]);
                     }
                 }
                 for (n = 7; n >= 8 - width % 8; n--) {
-                    //canvas.drawPoint(x, y, new Paint(0xFF000000 | palette[data[dy * rowBytes + dx] >> n & 1]));
-                    //canvas.drawRect(x, y, 1, 1, new Paint(palette[data[dy * rowBytes + dx] >> n & 1]));
                     bitmap.setPixel(x, y, palette[data[dy * rowBytes + dx] >> n & 1]);
                 }
                 i += this.width - width;
@@ -79,8 +73,6 @@ public class AndroidScreen implements IScreen {
             for (int ly = y; ly < y + height; ++ly) {
                 for (int lx = x; lx < x + width; ++lx) {
                     int d = data[i++] & 0xFF;
-                    //canvas.drawPoint(lx, ly, new Paint(0xFF000000 | palette[d]));
-                    //canvas.drawRect(lx, ly, 1, 1, new Paint(palette[d]));
                     bitmap.setPixel(lx, ly, palette[d]);
                 }
             }
@@ -89,41 +81,27 @@ public class AndroidScreen implements IScreen {
 
     @Override
     public void drawJPEG(int x, int y, int width, int height, byte[] data) {
-        //synchronized (bitmap) {
         Bitmap jpeg = BitmapFactory.decodeByteArray(data, 0, data.length);
         Canvas canvas = new Canvas(bitmap);
         canvas.drawBitmap(jpeg, x, y, new Paint());
         jpeg.recycle();
-
-        //}
     }
 
     @Override
     public void copyPixels(int x, int y, int width, int height, int srcX, int srcY) {
-        //synchronized (bitmap) {
         Canvas canvas = new Canvas(bitmap);
         int[] copied = new int[ width * height];
         bitmap.getPixels(copied, 0, bitmap.getWidth(), x, y, width, height);
         Bitmap sub = Bitmap.createBitmap(copied, 0, width, width, height, Bitmap.Config.ARGB_8888);
         canvas.drawBitmap(sub, x, y, new Paint());
-        /*for (int yA = y; yA < y + height; yA++) {
-            for (int xA = x; xA < x + width; xA++) {
-
-                bitmap.setPixel(xA, yA, bitmap.getPixel(srcX + xA - x, srcY + yA - y));
-            }
-        }*/
-
-        //}
     }
 
     @Override
     public void fillPixels(int x, int y, int width, int height, int color) {
-        //synchronized (bitmap) {
         Canvas canvas = new Canvas(bitmap);
         Paint c = new Paint();
         c.setColor(color);
         canvas.drawRect(x, y, width, height, c);
-        //}
     }
 
     public void update() {
@@ -159,7 +137,7 @@ public class AndroidScreen implements IScreen {
         Canvas canvas = new Canvas(bitmap);
         Paint cursor = new Paint();
         cursor.setColor(0xFF00FF);
-        canvas.drawRect(x, y, w, h, cursor);
+        canvas.drawRect(x, y, 10, 10, cursor);
     }
 
     public void process() {

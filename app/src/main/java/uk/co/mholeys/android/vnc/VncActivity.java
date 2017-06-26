@@ -43,25 +43,6 @@ public class VncActivity extends AppCompatActivity {
 
     private View mDecorView;
 
-    float lastScrollX = 0;
-    float lastScrollY = 0;
-
-    float lastX = 0;
-    float lastY = 0;
-
-    double differenceX;
-    double differenceY;
-
-    double scale = 1;
-
-    boolean click = false;
-    boolean left = false;
-    boolean right = false;
-    int clickCount = 0;
-    long lastClick = 0;
-
-    static ScaleGestureDetector scaleDetector;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -73,7 +54,6 @@ public class VncActivity extends AppCompatActivity {
         final Activity activity = this;
 
         mDecorView = getWindow().getDecorView();
-        scaleDetector = new ScaleGestureDetector(getApplicationContext(), new ScaleListener());
 
         /*Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -118,7 +98,6 @@ public class VncActivity extends AppCompatActivity {
                 .addEncoding(Encoding.CORRE_ENCODING)
                 .addEncoding(Encoding.RRE_ENCODING)
                 .addEncoding(Encoding.RAW_ENCODING)
-                .addEncoding(Encoding.JPEG_QUALITY_LEVEL_1_PSEUDO_ENCODING)
                 .addEncoding(Encoding.COMPRESSION_LEVEL_0_PSEUDO_ENCODING)
                 .addEncoding(Encoding.CURSOR_PSEUDO_ENCODING);
         connection.setPrefferedEncoding(preferedEncoding);
@@ -166,160 +145,13 @@ public class VncActivity extends AppCompatActivity {
             mProtoThread.start();
             androidInterface.display.setLayoutParams(new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT));
             layout.addView(androidInterface.display);
-            androidInterface.display.setOnTouchListener(new View.OnTouchListener() {
+            androidInterface.display.setOnTouchListener(mouse);
+            /*new View.OnTouchListener() {
                 @Override
                 public boolean onTouch(View v, MotionEvent event) {
                     return onTouchEvent(event);
                 }
-            });
-        }
-    }
-
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        screen = (AndroidScreen) androidInterface.getScreen();
-        int action = MotionEventCompat.getActionMasked(event);
-
-        int pointerCount = event.getPointerCount();
-        int id = MotionEventCompat.getActionIndex(event);
-        final int pointerIndex = MotionEventCompat.getActionIndex(event);
-
-        long sinceLast = lastClick - System.currentTimeMillis();
-        lastClick = System.currentTimeMillis();
-        if (sinceLast > 200) {
-            Logger.logger.printLn("Reset click count was: " + clickCount);
-            clickCount = 0;
-        }
-
-        switch (action) {
-            case (MotionEvent.ACTION_DOWN):
-                if (pointerCount == 1) {
-                    lastX = event.getX(pointerIndex);
-                    lastY = event.getY(pointerIndex);
-                    click = true;
-                    clickCount++;
-                }
-                /*if (pointerCount == 2) {
-                    lastScrollX = event.getX(pointerIndex);
-                    lastScrollY = event.getY(pointerIndex);
-                }*/
-                break;
-            case (MotionEvent.ACTION_POINTER_DOWN):
-                /*if (pointerCount == 4) {
-                    //Toggle keyboard
-                    if (keyboardState) {
-                        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
-                    } else {
-                        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
-                    }
-                    Logger.logger.printLn("Toggled keyboard");
-                    keyboardState = !keyboardState;
-                }*/
-                break;
-            case (MotionEvent.ACTION_MOVE):
-                if (pointerCount == 1) {
-                    if (clickCount == 1) {
-                        click = false;
-                    }
-                    differenceX = lastX - event.getX();
-                    differenceY = lastY - event.getY();
-                    lastX = event.getX();
-                    lastY = event.getY();
-                    if (clickCount == 2) {
-                        mouse.localX -= differenceX;
-                        mouse.localY -= differenceY;
-                        mouse.left = click;
-                        mouse.right = false;
-                        mouse.addToQueue();
-                    }
-                }
-                /*if (pointerCount == 1) {
-                    float x = event.getX(pointerIndex);
-                    float y = event.getY(pointerIndex);
-
-                    mouse.localX += (short)(lastX - x);
-                    mouse.localY += (short)(lastY - y);
-                    lastX = x;
-                    lastY = y;
-
-                    if (clickCount == 2) {
-                        left = true;
-                        right = false;
-                    } else {
-                        left = false;
-                        right = false;
-                        click = false;
-                    }
-                } else if (pointerCount == 2) {
-                    float x = event.getX(pointerIndex);
-                    float y = event.getY(pointerIndex);
-                    xOffset = lastScrollX - x;
-                    yOffset = lastScrollY - y;
-                    screen.cutX -= xOffset;
-                    screen.cutY -= yOffset;
-                    screen.update();
-                    lastScrollX = x;
-                    lastScrollY = y;
-                } else if (pointerCount == 3) {
-                    scale = 1f;
-
-                    xOffset = 0;
-                    yOffset = 0;
-                    lastScrollX = 0;
-                    lastScrollY = 0;
-                    screen.zoomScale = scale;
-                    screen.cutX = 0;
-                    screen.cutY = 0;
-                    screen.update();
-                }*/
-                scaleDetector.onTouchEvent(event);
-                break;
-            case (MotionEvent.ACTION_UP):
-                differenceX = lastX - event.getX();
-                differenceY = lastY - event.getY();
-                if (click) {
-                    if (clickCount == 1) {
-                        mouse.localX -= differenceX;
-                        mouse.localY -= differenceY;
-                        mouse.left = true;
-                        mouse.right = false;
-                        mouse.addToQueue();
-                    } else if (clickCount == 3) {
-                        mouse.localX -= differenceX;
-                        mouse.localY -= differenceY;
-                        mouse.left = false;
-                        mouse.right = true;
-                        mouse.addToQueue();
-                    }
-                    click = false;
-                    clickCount = 0;
-                }
-                mouse.left = false;
-                mouse.right = false;
-                mouse.addToQueue();
-                break;
-            case (MotionEvent.ACTION_CANCEL):
-                left = false;
-                right = false;
-                click = false;
-                clickCount = 0;
-                break;
-            case (MotionEvent.ACTION_OUTSIDE):
-                break;
-            default:
-                break;
-        }
-        return true;
-    }
-
-    private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
-        @Override
-        public boolean onScale(ScaleGestureDetector detector) {
-            scale *= detector.getScaleFactor();
-            scale = Math.max(1.0f, Math.min(scale, 5.0f));
-            screen.zoomScale = scale;
-            screen.update();
-            return true;
+            });*/
         }
     }
 
