@@ -4,11 +4,11 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Looper;
-import android.support.v4.view.MotionEventCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.view.MotionEvent;
-import android.view.ScaleGestureDetector;
+import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
@@ -47,9 +47,12 @@ public class VncActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_vnc);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+
 
         final Logger logger = new Logger(new LoggerOutStream());
-        logger.logLevel = Logger.LOG_LEVEL_NORMAL;
+        logger.logLevel = Logger.LOG_LEVEL_NONE;
 
         final Activity activity = this;
 
@@ -61,10 +64,10 @@ public class VncActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
         connection = new ServerData();
-        connection.inetAddress = (InetAddress) intent.getSerializableExtra(ServerList.SERVER_INFO_CONNECTION);
-        connection.address = intent.getStringExtra(ServerList.SERVER_INFO_ADDRESS);
-        connection.port = intent.getIntExtra(ServerList.SERVER_INFO_PORT, 0);
-        connection.password = intent.getStringExtra(ServerList.SERVER_INFO_PASSWORD);
+        connection.inetAddress = (InetAddress) intent.getSerializableExtra(ServerListActivity.SERVER_INFO_CONNECTION);
+        connection.address = intent.getStringExtra(ServerListActivity.SERVER_INFO_ADDRESS);
+        connection.port = intent.getIntExtra(ServerListActivity.SERVER_INFO_PORT, 0);
+        connection.password = intent.getStringExtra(ServerListActivity.SERVER_INFO_PASSWORD);
 
         connection.prepare();
         while (connection.result != -1) {
@@ -98,6 +101,7 @@ public class VncActivity extends AppCompatActivity {
                 .addEncoding(Encoding.CORRE_ENCODING)
                 .addEncoding(Encoding.RRE_ENCODING)
                 .addEncoding(Encoding.RAW_ENCODING)
+                .addEncoding(Encoding.JPEG_QUALITY_LEVEL_5_PSEUDO_ENCODING)
                 .addEncoding(Encoding.COMPRESSION_LEVEL_0_PSEUDO_ENCODING)
                 .addEncoding(Encoding.CURSOR_PSEUDO_ENCODING);
         connection.setPrefferedEncoding(preferedEncoding);
@@ -133,8 +137,8 @@ public class VncActivity extends AppCompatActivity {
                                     Toast.makeText(activity, "Could not connect to ", Toast.LENGTH_SHORT).show();
                                 }
                             });
-                        /*Intent i = new Intent(activity, MainActivity.class);
-                        activity.startActivity(i);*/
+                            Intent i = new Intent(activity, ServerListActivity.class);
+                            activity.startActivity(i);
                         } catch (NullPointerException e) {
                             e.printStackTrace();
                         }
@@ -153,6 +157,36 @@ public class VncActivity extends AppCompatActivity {
                 }
             });*/
         }
+    }
+
+    @Override
+    public boolean onKeyDown(int code, KeyEvent e) {
+        if (super.onKeyDown(code, e)) return true;
+
+        if (protocol != null) {
+            if (protocol.ui != null) {
+                if (protocol.ui.getKeyboardManager() != null) {
+                    Log.d("VNCActivity", "Key pressed: " + code + " " + e.getModifiers());
+                    ((AndroidKeyboard)protocol.ui.getKeyboardManager()).addKey(e, true);
+                }
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean onKeyUp(int code, KeyEvent e) {
+        if (super.onKeyUp(code, e)) return true;
+
+        if (protocol != null) {
+            if (protocol.ui != null) {
+                if (protocol.ui.getKeyboardManager() != null) {
+                    Log.d("VNCActivity", "Key pressed: " + code + " " + e.getModifiers());
+                    ((AndroidKeyboard) protocol.ui.getKeyboardManager()).addKey(e, false);
+                }
+            }
+        }
+        return false;
     }
 
     @Override
