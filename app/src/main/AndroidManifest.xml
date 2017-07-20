@@ -11,7 +11,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".ServerList"
+            android:name=".ServerListActivity"
             android:label="@string/title_activity_server_list"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
@@ -23,13 +23,19 @@
         <activity
             android:name=".VncActivity"
             android:label="@string/title_activity_vnc"
-            android:parentActivityName=".ServerList"
+            android:parentActivityName=".ServerListActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="uk.co.mholeys.android.vnc.ServerList" />
+                android:value="uk.co.mholeys.android.vnc.ServerListActivity" />
         </activity>
-        <activity android:name=".AddServerActivity"></activity>
+        <activity android:name=".AddServerActivity" />
+        <activity android:name=".EditServerActivity" />
+        <activity android:name=".PresentationActivity">
+            <intent-filter>
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>
