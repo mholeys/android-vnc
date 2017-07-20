@@ -3,7 +3,14 @@ package uk.co.mholeys.android.vnc.display;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
+import android.provider.Settings;
+import android.util.Log;
+
+import java.util.NoSuchElementException;
 
 import uk.co.mholeys.vnc.display.IScreen;
 import uk.co.mholeys.vnc.display.UpdateManager;
@@ -19,6 +26,10 @@ import uk.co.mholeys.vnc.log.Logger;
  * Created by Matthew on 25/09/2016.
  */
 public class AndroidScreen implements IScreen {
+
+    long last = 0;
+    long delta = 0;
+    int fps = 0;
 
     AndroidDisplay display;
     public static Bitmap bitmap;
@@ -43,6 +54,7 @@ public class AndroidScreen implements IScreen {
                 bitmap.setPixel(xA, yA, pixels[(xA - x) + ((yA - y) * width)]);
             }
         }
+        fpsCounter();
     }
 
     @Override
@@ -77,6 +89,7 @@ public class AndroidScreen implements IScreen {
                 }
             }
         }
+        fpsCounter();
     }
 
     @Override
@@ -85,6 +98,7 @@ public class AndroidScreen implements IScreen {
         Canvas canvas = new Canvas(bitmap);
         canvas.drawBitmap(jpeg, x, y, new Paint());
         jpeg.recycle();
+        fpsCounter();
     }
 
     @Override
@@ -94,6 +108,8 @@ public class AndroidScreen implements IScreen {
         bitmap.getPixels(copied, 0, bitmap.getWidth(), x, y, width, height);
         Bitmap sub = Bitmap.createBitmap(copied, 0, width, width, height, Bitmap.Config.ARGB_8888);
         canvas.drawBitmap(sub, x, y, new Paint());
+        sub.recycle();
+        fpsCounter();
     }
 
     @Override
@@ -101,7 +117,8 @@ public class AndroidScreen implements IScreen {
         Canvas canvas = new Canvas(bitmap);
         Paint c = new Paint();
         c.setColor(color);
-        canvas.drawRect(x, y, width, height, c);
+        canvas.drawRect(x, y, x+width, y+height, c);
+        fpsCounter();
     }
 
     public void update() {
@@ -141,36 +158,86 @@ public class AndroidScreen implements IScreen {
     }
 
     public void process() {
-        while (updateManager.hasUpdates()) {
-            ScreenUpdate update = updateManager.getUpdate();
-            if (update == null) continue;
-            int x = update.x;
-            int y = update.y;
-            int w = update.width;
-            int h = update.height;
-            Logger.logger.printLn(update.getClass().toString() + " x:" + x + " y:" + y + " w:" + w + " h:" + h);
+        if (updateManager.hasUpdates()) {
+            /*Thread t = new Thread(new Runnable() {
+                @Override
+                public void run() {*/
+                    while (updateManager.hasUpdates()) {
+                        ScreenUpdate update = null;
+                        try {
+                            update = updateManager.getUpdate();
+                        } catch (NoSuchElementException e) {
+                            continue;
+                        }
+                        if (update == null) return;
+                        int x = update.x;
+                        int y = update.y;
+                        int w = update.width;
+                        int h = update.height;
+                        Logger.logger.printLn(update.getClass().toString() + " x:" + x + " y:" + y + " w:" + w + " h:" + h);
 
-            int width = update.width;
-            int height = update.height;
-            bitmap.prepareToDraw();
-            if (update instanceof RawScreenUpdate) {
-                RawScreenUpdate raw = (RawScreenUpdate) update;
-                drawPixels(x, y, width, height, raw.pixels);
-            } else if (update instanceof PaletteScreenUpdate) {
-                PaletteScreenUpdate palette = (PaletteScreenUpdate) update;
-                drawPalette(x, y, width, height, palette.palette, palette.paletteSize, palette.data);
-            } else if (update instanceof JPEGScreenUpdate) {
-                JPEGScreenUpdate jpeg = (JPEGScreenUpdate) update;
-                drawJPEG(x, y, width, height, jpeg.jpegData);
-            } else if (update instanceof CopyScreenUpdate) {
-                CopyScreenUpdate copy = (CopyScreenUpdate) update;
-                copyPixels(copy.xSrc, copy.ySrc, width, height, x, y);
-            } else if (update instanceof FillScreenUpdate) {
-                FillScreenUpdate fill = (FillScreenUpdate) update;
-                fillPixels(x, y, width, height, fill.pixel);
-            }
-            display.postInvalidate();
+                        try {
+                            int width = update.width;
+                            int height = update.height;
+                            bitmap.prepareToDraw();
+                            if (update instanceof RawScreenUpdate) {
+                                RawScreenUpdate raw = (RawScreenUpdate) update;
+                                drawPixels(x, y, width, height, raw.pixels);
+                            } else if (update instanceof PaletteScreenUpdate) {
+                                PaletteScreenUpdate palette = (PaletteScreenUpdate) update;
+                                drawPalette(x, y, width, height, palette.palette, palette.paletteSize, palette.data);
+                            } else if (update instanceof JPEGScreenUpdate) {
+                                JPEGScreenUpdate jpeg = (JPEGScreenUpdate) update;
+                                drawJPEG(x, y, width, height, jpeg.jpegData);
+                            } else if (update instanceof CopyScreenUpdate) {
+                                CopyScreenUpdate copy = (CopyScreenUpdate) update;
+                                copyPixels(copy.xSrc, copy.ySrc, width, height, x, y);
+                            } else if (update instanceof FillScreenUpdate) {
+                                FillScreenUpdate fill = (FillScreenUpdate) update;
+                                fillPixels(x, y, width, height, fill.pixel);
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            Log.d("Screen", "Failed to render " + update.getClass().getCanonicalName() + " x:" + x + " y:" + y + " w:" + w + " h:" + h);
+                        }
+                    }
+                    display.postInvalidate();
+                /*}
+            });
+            t.start();*/
         }
+    }
+
+    public void fpsCounter() {
+        /*if (last == 0) {
+            last = System.currentTimeMillis();
+        }
+        long now = System.currentTimeMillis();
+        if (delta > 1000) {
+            delta -= 1000;
+            fps = 0;
+        } else {
+            delta += now - last;
+        }
+        last = now;
+        fps++;
+        Canvas c = new Canvas(bitmap);
+        Paint paint = new Paint();
+        Paint font = new Paint();
+
+        paint.setColor(Color.WHITE); // Back Color
+        font.setColor(Color.BLACK); // Text Color
+
+        paint.setStrokeWidth(12);
+        font.setStrokeWidth(12); // Text Size
+        font.setTextSize(30f);
+
+        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_OVER));
+        font.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_OVER));
+
+        c.drawRect(100, 25, 200, 50, paint);
+        c.drawText("FPS: " + fps, 100, 50, font);
+        System.out.println(fps);*/
     }
 
 }

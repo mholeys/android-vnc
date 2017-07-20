@@ -7,7 +7,7 @@ import java.io.OutputStream;
 /**
  * Created by Matthew on 04/04/2017.
  */
-class LoggerOutStream extends OutputStream {
+public class LoggerOutStream extends OutputStream {
 
     String message = "";
 

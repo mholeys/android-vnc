@@ -5,6 +5,8 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.support.v7.widget.AppCompatImageView;
+import android.util.Log;
 import android.widget.ImageView;
 
 import uk.co.mholeys.android.vnc.input.AndroidMouse;
@@ -14,7 +16,7 @@ import uk.co.mholeys.vnc.log.Logger;
 /**
  * Created by Matthew on 25/09/2016.
  */
-public class AndroidDisplay extends ImageView implements IDisplay {
+public class AndroidDisplay extends AppCompatImageView implements IDisplay {
 
     public AndroidScreen screen;
     public AndroidMouse mouse;
@@ -86,7 +88,7 @@ public class AndroidDisplay extends ImageView implements IDisplay {
         scaleMatrix.setScale(scale, scale);
         canvas.setMatrix(canvasMatrix);
         canvas.drawBitmap(screen.bitmap, scaleMatrix, new Paint());
-        canvas.drawRect(mouse.remoteX, mouse.remoteY, 5, 5, new Paint(Color.GREEN));
+        //canvas.drawRect(mouse.remoteX, mouse.remoteY, 5, 5, new Paint(Color.GREEN));
 
 
         /*if (screen == null) {

@@ -18,9 +18,9 @@ import android.widget.ListView;
 
 import uk.co.mholeys.android.vnc.data.SQLHelper;
 
-public class ServerList extends AppCompatActivity {
+public class ServerListActivity extends AppCompatActivity {
 
-    public final static String TAG = "mholeys.vnc.ServerList";
+    public final static String TAG = "vnc.ServerListActivity";
 
     public final static String SERVER_INFO_ADDRESS = "uk.co.mholeys.android.vnc.serverinfo.address";
     public final static String SERVER_INFO_PORT = "uk.co.mholeys.android.vnc.serverinfo.port";
@@ -109,14 +109,19 @@ public class ServerList extends AppCompatActivity {
     public void deleteServer(ServerData server) {
         listItems.remove(server);
         SQLiteDatabase db = new SQLHelper(this).getWritableDatabase();
+        db.beginTransaction();
         db.delete(SQLHelper.SERVERS_TABLE_NAME,
                 SQLHelper.SERVER_COLUMN_ADDRESS + "=? AND " +
                 SQLHelper.SERVER_COLUMN_NAME + "=? AND " +
                 SQLHelper.SERVER_COLUMN_PORT + "=?",
                 new String[] {server.address, server.name, ""+server.port});
+        db.endTransaction();
     }
 
     public void startVncViewer(ServerData server) {
+        // Check for chrome casts
+        // Give option?
+
         Intent intent = new Intent(this, VncActivity.class);
         intent.putExtra(SERVER_INFO_CONNECTION, server.inetAddress);
         intent.putExtra(SERVER_INFO_ADDRESS, server.address);
@@ -128,6 +133,7 @@ public class ServerList extends AppCompatActivity {
     private void loadServers() {
         SQLiteDatabase db = new SQLHelper(this).getReadableDatabase();
 
+        db.beginTransaction();
         String[] projection = {
                 SQLHelper.SERVER_COLUMN_ID,
                 SQLHelper.SERVER_COLUMN_NAME,
@@ -159,7 +165,7 @@ public class ServerList extends AppCompatActivity {
                 cursor.moveToNext();
             }
         }
-
+        db.endTransaction();
     }
 
 }

@@ -1,9 +1,11 @@
 package uk.co.mholeys.android.vnc.display;
 
 import android.content.Context;
+import android.graphics.Point;
 
 import uk.co.mholeys.android.vnc.input.AndroidKeyboard;
 import uk.co.mholeys.android.vnc.input.AndroidMouse;
+import uk.co.mholeys.vnc.data.PixelFormat;
 import uk.co.mholeys.vnc.display.IDisplay;
 import uk.co.mholeys.vnc.display.IKeyboardManager;
 import uk.co.mholeys.vnc.display.IMouseManager;
@@ -22,6 +24,9 @@ public class AndroidInterface implements IUserInterface {
     Context context;
     AndroidKeyboard keyboard = new AndroidKeyboard();
     AndroidMouse mouse = new AndroidMouse(this);
+    public int androidWidth;
+    public int androidHeight;
+    public PixelFormat format;
 
     public AndroidInterface(Context context, AndroidDisplay display) {
         this.context = context;
@@ -53,6 +58,11 @@ public class AndroidInterface implements IUserInterface {
     }
 
     @Override
+    public PixelFormat getServerFormat() {
+        return format;
+    }
+
+    @Override
     public void setUpdateManager(UpdateManager updateManager) {
         this.updateManager = updateManager;
         this.screen.updateManager = updateManager;
@@ -67,6 +77,15 @@ public class AndroidInterface implements IUserInterface {
         }
         display.screen = screen;
         display.mouse = mouse;
+
+        mouse.mouseScaleW = (double)width / (double) androidWidth;
+        mouse.mouseScaleH = (double)height / (double) androidHeight;
+    }
+
+
+    @Override
+    public void setServerFormat(PixelFormat format) {
+        this.format = format;
     }
 
     @Override

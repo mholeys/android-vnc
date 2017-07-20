@@ -1,21 +1,24 @@
-package uk.co.mholeys.android.vnc;
+package uk.co.mholeys.android.vnc.display;
 
 import android.app.Activity;
+import android.app.Presentation;
+import android.content.Context;
 import android.content.Intent;
-import android.graphics.Point;
-import android.hardware.display.DisplayManager;
 import android.os.Bundle;
 import android.os.Looper;
-import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
-import android.view.KeyEvent;
-import android.view.MotionEvent;
+import android.view.Display;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
-import uk.co.mholeys.android.vnc.display.AndroidScreen;
+import java.io.IOException;
+import java.net.InetAddress;
+
+import uk.co.mholeys.android.vnc.LoggerOutStream;
+import uk.co.mholeys.android.vnc.R;
+import uk.co.mholeys.android.vnc.ServerData;
+import uk.co.mholeys.android.vnc.ServerListActivity;
 import uk.co.mholeys.android.vnc.input.AndroidKeyboard;
 import uk.co.mholeys.android.vnc.input.AndroidMouse;
 import uk.co.mholeys.vnc.VNCConnectionException;
@@ -24,21 +27,21 @@ import uk.co.mholeys.vnc.data.EncodingSettings;
 import uk.co.mholeys.vnc.log.Logger;
 import uk.co.mholeys.vnc.net.VNCProtocol;
 
-import java.io.IOException;
-import java.net.InetAddress;
+/**
+ * Created by Matthew on 28/06/2017.
+ */
 
-import uk.co.mholeys.android.vnc.display.AndroidDisplay;
-import uk.co.mholeys.android.vnc.display.AndroidInterface;
+public class VNCPresentation extends Presentation {
 
-public class VncActivity extends AppCompatActivity {
+    Context outerConext;
 
     private Thread mProtoThread;
     private VNCProtocol protocol;
     private boolean mReady = true;
     private ServerData connection;
     private AndroidInterface androidInterface;
-    private AndroidScreen screen;
-    private AndroidDisplay display;
+    private AndroidScreen vncScreen;
+    private AndroidDisplay vncDisplay;
     private AndroidMouse mouse;
     private AndroidKeyboard keyboard;
 
@@ -46,29 +49,33 @@ public class VncActivity extends AppCompatActivity {
 
     private View mDecorView;
 
+    public VNCPresentation(Context outerContext, Display display, InetAddress address, String addressText, int port, String password) {
+        super(outerContext, display);
+        this.outerConext = outerContext;
+
+        connection = new ServerData();
+        connection.inetAddress = address;
+        connection.address = addressText;
+        connection.port = port;
+        connection.password = password;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_vnc);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
+
+
         final Logger logger = new Logger(new LoggerOutStream());
         logger.logLevel = Logger.LOG_LEVEL_NONE;
-
-        final Activity activity = this;
 
         mDecorView = getWindow().getDecorView();
 
         /*Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);*/
-
-        Intent intent = getIntent();
-        connection = new ServerData();
-        connection.inetAddress = (InetAddress) intent.getSerializableExtra(ServerListActivity.SERVER_INFO_CONNECTION);
-        connection.address = intent.getStringExtra(ServerListActivity.SERVER_INFO_ADDRESS);
-        connection.port = intent.getIntExtra(ServerListActivity.SERVER_INFO_PORT, 0);
-        connection.password = intent.getStringExtra(ServerListActivity.SERVER_INFO_PASSWORD);
 
         connection.prepare();
         while (connection.result != -1) {
@@ -85,13 +92,7 @@ public class VncActivity extends AppCompatActivity {
         }
 
         if (connection.getAddress() == null) {
-            //Logger.logger.printLn("Failed to connect to host");
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    Toast.makeText(activity, "Failed to connect to host", Toast.LENGTH_LONG);
-                }
-            });
+            Logger.logger.printLn("Failed to connect to host");
             mReady = false;
         }
 
@@ -102,23 +103,17 @@ public class VncActivity extends AppCompatActivity {
                 .addEncoding(Encoding.CORRE_ENCODING)
                 .addEncoding(Encoding.RRE_ENCODING)
                 .addEncoding(Encoding.RAW_ENCODING)
-                .addEncoding(Encoding.JPEG_QUALITY_LEVEL_2_PSEUDO_ENCODING)
+                .addEncoding(Encoding.JPEG_QUALITY_LEVEL_5_PSEUDO_ENCODING)
                 .addEncoding(Encoding.COMPRESSION_LEVEL_0_PSEUDO_ENCODING)
-                //.addEncoding(Encoding.CURSOR_PSEUDO_ENCODING)
-        ;
+                .addEncoding(Encoding.CURSOR_PSEUDO_ENCODING);
         connection.setPrefferedEncoding(preferedEncoding);
 
 
-        androidInterface = new AndroidInterface(this, new AndroidDisplay(activity, null));
+        androidInterface = new AndroidInterface(outerConext, new AndroidDisplay(outerConext, null));
         mouse = (AndroidMouse) androidInterface.getMouseManager();
         keyboard = (AndroidKeyboard) androidInterface.getKeyboardManager();
 
         RelativeLayout layout = (RelativeLayout) findViewById(R.id.layoutVnc);
-
-        Point p = new Point();
-        getWindowManager().getDefaultDisplay().getSize(p);
-        androidInterface.androidWidth = p.x;
-        androidInterface.androidHeight = p.y;
 
         if (mReady) {
             mProtoThread = new Thread() {
@@ -133,19 +128,9 @@ public class VncActivity extends AppCompatActivity {
                             protocol.run();
                         } catch (VNCConnectionException e) {
                             final String reason = e.toString();
-                            activity.runOnUiThread(new Runnable() {
-                                public void run() {
-                                    Toast.makeText(activity, reason, Toast.LENGTH_SHORT).show();
-                                }
-                            });
+                            Logger.logger.printLn(reason);
                         } catch (IOException e) {
-                            activity.runOnUiThread(new Runnable() {
-                                public void run() {
-                                    Toast.makeText(activity, "Could not connect to ", Toast.LENGTH_SHORT).show();
-                                }
-                            });
-                            Intent i = new Intent(activity, ServerListActivity.class);
-                            activity.startActivity(i);
+                            Logger.logger.printLn("Could not connect to " + connection.inetAddress);
                         } catch (NullPointerException e) {
                             e.printStackTrace();
                         }
@@ -156,50 +141,14 @@ public class VncActivity extends AppCompatActivity {
             mProtoThread.start();
             androidInterface.display.setLayoutParams(new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT));
             layout.addView(androidInterface.display);
-            androidInterface.display.setOnHoverListener(mouse);
             androidInterface.display.setOnTouchListener(mouse);
-            androidInterface.display.setOnGenericMotionListener(mouse);
-
-/*            new View.OnTouchListener() {
+            /*new View.OnTouchListener() {
                 @Override
                 public boolean onTouch(View v, MotionEvent event) {
-
                     return onTouchEvent(event);
                 }
             });*/
         }
-    }
-
-    @Override
-    public boolean onKeyDown(int code, KeyEvent e) {
-        if (super.onKeyDown(code, e)) return true;
-
-        if (protocol != null) {
-            if (protocol.ui != null) {
-                if (protocol.ui.getKeyboardManager() != null) {
-                    Log.d("VNCActivity", "Key pressed: " + code + " " + e.getModifiers());
-                    ((AndroidKeyboard)protocol.ui.getKeyboardManager()).addKey(e, true);
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    @Override
-    public boolean onKeyUp(int code, KeyEvent e) {
-        if (super.onKeyUp(code, e)) return true;
-
-        if (protocol != null) {
-            if (protocol.ui != null) {
-                if (protocol.ui.getKeyboardManager() != null) {
-                    Log.d("VNCActivity", "Key pressed: " + code + " " + e.getModifiers());
-                    ((AndroidKeyboard) protocol.ui.getKeyboardManager()).addKey(e, false);
-                    return true;
-                }
-            }
-        }
-        return false;
     }
 
     @Override
@@ -215,9 +164,6 @@ public class VncActivity extends AppCompatActivity {
                             | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);}
     }
 
-
-
-
     @Override
     protected void onStop() {
         super.onStop();
@@ -225,5 +171,5 @@ public class VncActivity extends AppCompatActivity {
             protocol.disconnect();
         } catch (Exception e) { }
     }
-}
 
+}
