@@ -2,6 +2,7 @@ package uk.co.mholeys.android.vnc.input;
 
 import android.app.Activity;
 import android.content.Context;
+import android.nfc.Tag;
 import android.support.v4.view.MotionEventCompat;
 import android.util.Log;
 import android.view.InputDevice;
@@ -14,10 +15,12 @@ import android.view.inputmethod.InputMethodManager;
 import java.util.LinkedList;
 import java.util.Queue;
 
+import uk.co.mholeys.android.vnc.display.AndroidDisplay;
 import uk.co.mholeys.android.vnc.display.AndroidInterface;
 import uk.co.mholeys.android.vnc.display.AndroidScreen;
 import uk.co.mholeys.vnc.data.PointerPoint;
 import uk.co.mholeys.vnc.display.IMouseManager;
+import uk.co.mholeys.vnc.display.IUserInterface;
 import uk.co.mholeys.vnc.log.Logger;
 
 /**
@@ -26,6 +29,7 @@ import uk.co.mholeys.vnc.log.Logger;
 
 public class AndroidMouse implements IMouseManager, View.OnTouchListener, View.OnGenericMotionListener, View.OnHoverListener {
 
+    private static final String TAG = "AndroidMouse";
     public Queue<PointerPoint> miceUpdates = new LinkedList<PointerPoint>();
 
     float lastScrollX = 0;
@@ -56,10 +60,10 @@ public class AndroidMouse implements IMouseManager, View.OnTouchListener, View.O
     public short localX, localY;
     public short remoteX, remoteY;
 
-    public AndroidInterface inf;
+    public IUserInterface inf;
     AndroidScreen screen;
 
-    public AndroidMouse(AndroidInterface inf) {
+    public AndroidMouse(IUserInterface inf) {
         this.inf = inf;
     }
 
@@ -129,7 +133,11 @@ public class AndroidMouse implements IMouseManager, View.OnTouchListener, View.O
     public boolean onTouch(View v, MotionEvent event) {
         screen = (AndroidScreen) inf.getScreen();
         if (scaleDetector == null) {
-            scaleDetector = new ScaleGestureDetector(inf.display.getContext(), new ScaleListener());
+            if (inf instanceof AndroidInterface) {
+                scaleDetector = new ScaleGestureDetector(((AndroidDisplay)inf.getDisplay()).getContext(), new ScaleListener());
+            } else {
+                Log.e(TAG, "Error creating scale gesture on cast device");
+            }
         }
         int action = MotionEventCompat.getActionMasked(event);
 

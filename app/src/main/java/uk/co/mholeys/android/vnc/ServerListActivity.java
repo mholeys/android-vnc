@@ -88,6 +88,7 @@ public class ServerListActivity extends AppCompatActivity {
 
         // groupId, itemId, order, title
         menu.add(0, v.getId(), 0, "Connect");
+        menu.add(0, v.getId(), 0, "Cast");
         menu.add(0, v.getId(), 0, "Delete");
         menu.add(0, v.getId(), 0, "Edit");
     }
@@ -107,6 +108,9 @@ public class ServerListActivity extends AppCompatActivity {
                 break;
             case "Edit":
                 editServerIntent(serverEntry);
+                break;
+            case "Cast":
+                castServerIntent(server);
                 break;
             default:
                 return false;
@@ -152,6 +156,15 @@ public class ServerListActivity extends AppCompatActivity {
         db.setTransactionSuccessful();
         db.endTransaction();
         db.close();
+    }
+
+    public void castServerIntent(ServerData server) {
+        Intent intent = new Intent(this, CastActivity.class);
+        intent.putExtra(SERVER_INFO_CONNECTION, server.inetAddress);
+        intent.putExtra(SERVER_INFO_ADDRESS, server.address);
+        intent.putExtra(SERVER_INFO_PORT, server.port);
+        intent.putExtra(SERVER_INFO_PASSWORD, server.password);
+        startActivity(intent);
     }
 
     public void startVncViewer(ServerData server) {
