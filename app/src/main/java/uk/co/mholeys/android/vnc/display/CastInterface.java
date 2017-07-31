@@ -2,8 +2,7 @@ package uk.co.mholeys.android.vnc.display;
 
 import android.content.Context;
 
-import uk.co.mholeys.android.vnc.CastActivity;
-import uk.co.mholeys.android.vnc.PresentationService;
+import uk.co.mholeys.android.vnc.CastPresentationService;
 import uk.co.mholeys.android.vnc.input.AndroidKeyboard;
 import uk.co.mholeys.android.vnc.input.AndroidMouse;
 import uk.co.mholeys.vnc.data.PixelFormat;
@@ -21,7 +20,7 @@ import uk.co.mholeys.vnc.display.UpdateManager;
 public class CastInterface implements IUserInterface {
 
 
-    private final PresentationService.VNCPresentation presentation;
+    private final CastPresentationService.VNCPresentation presentation;
     public AndroidDisplay display;
     AndroidScreen screen;
     private UpdateManager updateManager;
@@ -32,7 +31,7 @@ public class CastInterface implements IUserInterface {
     public int androidHeight;
     public PixelFormat format;
 
-    public CastInterface(PresentationService.VNCPresentation presentation, AndroidDisplay display) {
+    public CastInterface(CastPresentationService.VNCPresentation presentation, AndroidDisplay display) {
         this.presentation = presentation;
         this.context = presentation.getContext();
         this.display = display;

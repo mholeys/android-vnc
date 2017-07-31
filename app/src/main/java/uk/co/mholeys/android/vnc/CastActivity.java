@@ -1,15 +1,16 @@
 package uk.co.mholeys.android.vnc;
 
 import android.app.PendingIntent;
-import android.app.Presentation;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.constraint.ConstraintLayout;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.MediaRouteActionProvider;
 import android.support.v7.media.MediaRouteSelector;
 import android.support.v7.media.MediaRouter;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -21,6 +22,9 @@ import com.google.android.gms.common.api.Status;
 
 import java.net.InetAddress;
 
+import uk.co.mholeys.android.vnc.input.AndroidKeyboard;
+import uk.co.mholeys.vnc.net.VNCProtocol;
+
 public class CastActivity extends AppCompatActivity {
 
     public static final String TAG = "MainAct";
@@ -30,6 +34,8 @@ public class CastActivity extends AppCompatActivity {
     MediaRouteSelector mMediaRouteSelector;
     CastDevice mSelectedDevice;
 
+
+    VNCProtocol protocol;
     ServerData connection;
 
     MyMediaRouterCallback mMediaRouterCallback;
@@ -84,15 +90,21 @@ public class CastActivity extends AppCompatActivity {
 
         CastRemoteDisplayLocalService.startService(
                 getApplicationContext(),
-                PresentationService.class, REMOTE_DISPLAY_APP_ID,
+                CastPresentationService.class, REMOTE_DISPLAY_APP_ID,
                 mSelectedDevice, settings,
                 new CastRemoteDisplayLocalService.Callbacks() {
                     @Override
                     public void onServiceCreated(
                             CastRemoteDisplayLocalService service) {
                         connection.prepare();
-                        PresentationService pService = (PresentationService) service;
+                        CastPresentationService pService = (CastPresentationService) service;
                         pService.connection = connection;
+                        ConstraintLayout v = (ConstraintLayout) CastActivity.this.findViewById(R.id.castActivityLayout);
+
+                        v.setOnHoverListener(pService.mouse);
+                        v.setOnTouchListener(pService.mouse);
+                        v.setOnGenericMotionListener(pService.mouse);
+
                         Log.d(TAG, "onServiceCreated");
                     }
 
@@ -100,7 +112,8 @@ public class CastActivity extends AppCompatActivity {
                     public void onRemoteDisplaySessionStarted(
                             CastRemoteDisplayLocalService service) {
                         // initialize sender UI
-                        PresentationService pService = (PresentationService) service;
+                        CastPresentationService pService = (CastPresentationService) service;
+                        protocol = pService.protocol;
                     }
 
                     @Override
@@ -124,7 +137,6 @@ public class CastActivity extends AppCompatActivity {
 
     public void teardown() {
         // Stop everything the cast has ended
-        Log.e(TAG, "Should have stopped things. TODO URGENT");
         CastRemoteDisplayLocalService.stopService();
     }
 
@@ -139,6 +151,38 @@ public class CastActivity extends AppCompatActivity {
                 (MediaRouteActionProvider) MenuItemCompat.getActionProvider(mediaRouteMenuItem);
         mediaRouteActionProvider.setRouteSelector(mMediaRouteSelector);
         return true;
+    }
+
+    @Override
+    public boolean onKeyDown(int code, KeyEvent e) {
+        if (super.onKeyDown(code, e)) return true;
+
+        if (protocol != null) {
+            if (protocol.ui != null) {
+                if (protocol.ui.getKeyboardManager() != null) {
+                    Log.d("VNCActivity", "Key pressed: " + code + " " + e.getModifiers());
+                    ((AndroidKeyboard)protocol.ui.getKeyboardManager()).addKey(e, true);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean onKeyUp(int code, KeyEvent e) {
+        if (super.onKeyUp(code, e)) return true;
+
+        if (protocol != null) {
+            if (protocol.ui != null) {
+                if (protocol.ui.getKeyboardManager() != null) {
+                    Log.d("VNCActivity", "Key pressed: " + code + " " + e.getModifiers());
+                    ((AndroidKeyboard) protocol.ui.getKeyboardManager()).addKey(e, false);
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private class MyMediaRouterCallback extends MediaRouter.Callback {

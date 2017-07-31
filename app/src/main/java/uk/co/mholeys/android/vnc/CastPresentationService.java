@@ -30,21 +30,22 @@ import uk.co.mholeys.vnc.data.EncodingSettings;
 import uk.co.mholeys.vnc.log.Logger;
 import uk.co.mholeys.vnc.net.VNCProtocol;
 
-public class PresentationService extends CastRemoteDisplayLocalService {
+public class CastPresentationService extends CastRemoteDisplayLocalService {
 
     private static final String TAG = "VNC.pres.service";
     VNCPresentation mPresentation;
 
-    private static Thread mProtoThread;
-    private static VNCProtocol protocol;
-    static ServerData connection;
-    private static CastInterface castInterface;
-    private static AndroidScreen screen;
-    private static AndroidDisplay display;
-    private static AndroidMouse mouse;
-    private static AndroidKeyboard keyboard;
+    private Thread mProtoThread;
+    VNCProtocol protocol;
+    ServerData connection;
+    //FIXME: Cannot store context statically "Warning:(41, 5) Do not place Android context classes in static fields (static reference to `CastInterface` which has field `context` pointing to `Context`); this is a memory leak (and also breaks Instant Run)"
+    CastInterface castInterface;
+    AndroidScreen screen;
+    AndroidDisplay display;
+    AndroidMouse mouse;
+    AndroidKeyboard keyboard;
 
-    public PresentationService() {
+    public CastPresentationService() {
 
     }
 
@@ -80,7 +81,7 @@ public class PresentationService extends CastRemoteDisplayLocalService {
         }
     }
 
-    public final static class VNCPresentation extends CastPresentation {
+    public final class VNCPresentation extends CastPresentation {
 
         private ServerData connection;
         private boolean mReady = true;

@@ -32,13 +32,10 @@
         <activity android:name=".AddServerActivity" />
         <activity android:name=".EditServerActivity" />
         <activity android:name=".CastActivity" />
-        <activity android:name=".PresentationActivity">
-            <intent-filter>
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+        <activity android:name=".PresentationActivity"
+            android:label="@string/title_activity_presentation"/>
         <service
-            android:name=".PresentationService"
+            android:name=".CastPresentationService"
             android:enabled="true"
             android:exported="false"></service>
     </application>
