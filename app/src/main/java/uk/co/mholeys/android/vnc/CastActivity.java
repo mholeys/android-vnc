@@ -25,26 +25,27 @@ import java.net.InetAddress;
 import uk.co.mholeys.android.vnc.input.AndroidKeyboard;
 import uk.co.mholeys.vnc.net.VNCProtocol;
 
+@Deprecated
 public class CastActivity extends AppCompatActivity {
 
-    public static final String TAG = "MainAct";
+    public static final String TAG = "CastAct";
     public static final String REMOTE_DISPLAY_APP_ID = "B461FB4F";
 
     MediaRouter mMediaRouter;
     MediaRouteSelector mMediaRouteSelector;
     CastDevice mSelectedDevice;
 
+    MyMediaRouterCallback mMediaRouterCallback;
 
     VNCProtocol protocol;
     ServerData connection;
-
-    MyMediaRouterCallback mMediaRouterCallback;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cast);
 
+        // Setup cast button
         // Get a media router to use
         mMediaRouter = MediaRouter.getInstance(getApplicationContext());
         // Find a cast device that is compatible
