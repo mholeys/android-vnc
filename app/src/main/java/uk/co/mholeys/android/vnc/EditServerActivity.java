@@ -18,6 +18,7 @@ public class EditServerActivity extends AppCompatActivity {
     EditText mPort;
     EditText mPassword;
 
+
     int id = -1;
 
     @Override
@@ -32,7 +33,7 @@ public class EditServerActivity extends AppCompatActivity {
         mPort = (EditText) findViewById(R.id.portText);
         mPort.setText(""+intent.getIntExtra(ServerListActivity.SERVER_INFO_PORT, 5901));
         mPassword = (EditText) findViewById(R.id.serverPasswordText);
-        //mPassword.setText(intent.getStringExtra(ServerListActivity.SERVER_INFO_PASSWORD));
+        mPassword.setText(intent.getStringExtra(ServerListActivity.SERVER_INFO_PASSWORD));
         id = intent.getIntExtra(ServerListActivity.SERVER_INFO_DB_ID, -1);
         Log.d("EditServer", "id: " + id);
     }

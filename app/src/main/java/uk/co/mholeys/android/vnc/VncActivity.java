@@ -223,7 +223,10 @@ public class VncActivity extends AppCompatActivity {
         super.onStop();
         try {
             protocol.disconnect();
-        } catch (Exception e) { }
+            mProtoThread.join();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
 
