@@ -277,6 +277,10 @@ public class ServerListActivity extends AppCompatActivity {
                 startVncPresentation(server, mSelectedDisplay);
                 return;
             }
+            if (mDisplays.size() == 1 && mDisplays.contains(getWindowManager().getDefaultDisplay())) {
+                startVncBuiltInDisplay(server);
+                return;
+            }
 
             // Show display picker dialog
             AlertDialog.Builder builder = new AlertDialog.Builder(ServerListActivity.this);
