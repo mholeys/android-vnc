@@ -1,6 +1,7 @@
 package uk.co.mholeys.android.vnc;
 
 import android.os.AsyncTask;
+import android.util.Log;
 
 import uk.co.mholeys.vnc.data.EncodingSettings;
 import uk.co.mholeys.vnc.data.PixelFormat;
@@ -55,9 +56,8 @@ public class ServerData implements IConnectionInformation {
                 return 0;
             }
 
-            protected void onPostExecute(Integer result) {
-                result = result;
-                Logger.logger.printLn("Result of look up was " + result);
+            protected void onPostExecute(Integer r) {
+                result = r;
             }
         }.execute(address);
     }

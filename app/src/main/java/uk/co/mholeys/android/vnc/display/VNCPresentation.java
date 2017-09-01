@@ -6,6 +6,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Looper;
+import android.os.Message;
+import android.util.Log;
 import android.view.Display;
 import android.view.View;
 import android.view.WindowManager;
@@ -16,6 +18,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 
 import uk.co.mholeys.android.vnc.LoggerOutStream;
+import uk.co.mholeys.android.vnc.PresentationActivity;
 import uk.co.mholeys.android.vnc.R;
 import uk.co.mholeys.android.vnc.ServerData;
 import uk.co.mholeys.android.vnc.ServerListActivity;
@@ -33,6 +36,8 @@ import uk.co.mholeys.vnc.net.VNCProtocol;
 
 public class VNCPresentation extends Presentation {
 
+    static final String TAG = "VNCPresentation";
+
     Context outerConext;
 
     private Thread mProtoThread;
@@ -48,16 +53,13 @@ public class VNCPresentation extends Presentation {
     private boolean keyboardState = false;
 
     private View mDecorView;
+    public PresentationActivity.ToastHandler mToastHandler;
 
-    public VNCPresentation(Context outerContext, Display display, InetAddress address, String addressText, int port, String password) {
+    public VNCPresentation(Context outerContext, Display display, ServerData connection) {
         super(outerContext, display);
         this.outerConext = outerContext;
 
-        connection = new ServerData();
-        connection.inetAddress = address;
-        connection.address = addressText;
-        connection.port = port;
-        connection.password = password;
+        this.connection = connection;
     }
 
     @Override
@@ -77,22 +79,8 @@ public class VNCPresentation extends Presentation {
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);*/
 
-        connection.prepare();
-        while (connection.result != -1) {
-            try {
-                Thread.sleep(50);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-        try {
-            Thread.sleep(100);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        if (connection.getAddress() == null) {
-            Logger.logger.printLn("Failed to connect to host");
+        if (connection.getAddress() == null || connection.result == 0) {
+            Log.e(TAG, "Failed to get InetAddress");
             mReady = false;
         }
 
@@ -103,9 +91,10 @@ public class VNCPresentation extends Presentation {
                 .addEncoding(Encoding.CORRE_ENCODING)
                 .addEncoding(Encoding.RRE_ENCODING)
                 .addEncoding(Encoding.RAW_ENCODING)
-                .addEncoding(Encoding.JPEG_QUALITY_LEVEL_5_PSEUDO_ENCODING)
+                .addEncoding(Encoding.JPEG_QUALITY_LEVEL_2_PSEUDO_ENCODING)
                 .addEncoding(Encoding.COMPRESSION_LEVEL_0_PSEUDO_ENCODING)
-                .addEncoding(Encoding.CURSOR_PSEUDO_ENCODING);
+                //.addEncoding(Encoding.CURSOR_PSEUDO_ENCODING)
+                ;
         connection.setPrefferedEncoding(preferedEncoding);
 
 
@@ -128,9 +117,22 @@ public class VNCPresentation extends Presentation {
                             protocol.run();
                         } catch (VNCConnectionException e) {
                             final String reason = e.toString();
-                            Logger.logger.printLn(reason);
+                            Log.e(TAG, "Proto error: \" " + reason + "\"");
+                            Message m = new Message();
+                            m.arg1 = 0;
+                            Bundle b = new Bundle();
+                            b.putString("TEXT", reason);
+                            m.setData(b);
+                            mToastHandler.sendMessage(m);
+                            
                         } catch (IOException e) {
-                            Logger.logger.printLn("Could not connect to " + connection.inetAddress);
+                            Log.e(TAG, "Could not connect to " + connection.address + ":" + connection.port);
+                            Message m = new Message();
+                            m.arg1 = 0;
+                            Bundle b = new Bundle();
+                            b.putString("TEXT", "Could not connect to " + connection.address + ":" + connection.port);
+                            m.setData(b);
+                            mToastHandler.sendMessage(m);
                         } catch (NullPointerException e) {
                             e.printStackTrace();
                         }

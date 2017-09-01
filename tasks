@@ -1,6 +1,3 @@
-Merge cast button into main serverListActivity - done
-Make cast activity have mouse and keyboard input
+Make input activity have mouse and keyboard input - started (InputActivity for cast and PresentationActivity for hdmi)
 
-Implement custom cast button/menu to show HDMI/tv-out output as well as chromecast devices (or have another button like current cast button)
-
-Add settings for speed vs quality per connection
+Add settings for speed vs quality per connection (maybe default global )

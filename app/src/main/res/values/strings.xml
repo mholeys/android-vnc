@@ -13,4 +13,6 @@
     <string name="cast_app_id">FC3D72F0</string>
 
     <string name="media_route_menu_title">Cast</string>
+    <string name="title_activity_input">InputActivity</string>
+    <string name="display_list_select_title">Display</string>
 </resources>

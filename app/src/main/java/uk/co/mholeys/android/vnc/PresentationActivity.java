@@ -4,50 +4,87 @@ import android.app.Activity;
 import android.app.MediaRouteActionProvider;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.hardware.display.DisplayManager;
 import android.os.Bundle;
 import android.media.MediaRouter;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.Display;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.Toast;
 
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 
 import uk.co.mholeys.android.vnc.display.VNCPresentation;
 
 public class PresentationActivity extends Activity {
 
-    private final String TAG = "PresentationVNC";
+    private final String TAG = "PresentationActivity";
 
-    private MediaRouter mMediaRouter;
+    private ServerData connection;
     private VNCPresentation mPresentation;
+    private DisplayManager mDisplayManager;
+    private Display mDisplay;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Get the media router service.
-        mMediaRouter = (MediaRouter)getSystemService(Context.MEDIA_ROUTER_SERVICE);
-        setContentView(R.layout.activity_presentation);
+        Intent intent = getIntent();
+        int displayId = intent.getIntExtra(ServerListActivity.PRESENTATION_DISPLAY_ID, -1);
+        if (displayId == -1) {
+            returnToServerList();
+            return;
+        }
+        mDisplayManager = (DisplayManager) getSystemService(DISPLAY_SERVICE);
+        mDisplay = mDisplayManager.getDisplay(displayId);
+
+        connection = new ServerData();
+        connection.inetAddress = (InetAddress) intent.getSerializableExtra(ServerListActivity.SERVER_INFO_CONNECTION);
+        connection.address = intent.getStringExtra(ServerListActivity.SERVER_INFO_ADDRESS);
+        connection.port = intent.getIntExtra(ServerListActivity.SERVER_INFO_PORT, 0);
+        connection.password = intent.getStringExtra(ServerListActivity.SERVER_INFO_PASSWORD);
+
+        connection.prepare();
+        while (connection.result != -1) {
+            try {
+                Thread.sleep(50);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        try {
+            Thread.sleep(100);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        if (connection.getAddress() == null || connection.result == 0) {
+            Log.e(TAG, "Failed to get InetAddress");
+            returnToServerList();
+        }
+
+    }
+
+    private void returnToServerList() {
+        Intent serverListIntent = new Intent(PresentationActivity.this, ServerListActivity.class);
+        startActivity(serverListIntent);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-
-        mMediaRouter.addCallback(MediaRouter.ROUTE_TYPE_LIVE_VIDEO, mMediaRouterCallback);
         updatePresentation();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-
-        mMediaRouter.removeCallback(mMediaRouterCallback);
-
         updateContents();
     }
 
@@ -62,31 +99,9 @@ public class PresentationActivity extends Activity {
         }
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Be sure to call the super class.
-        super.onCreateOptionsMenu(menu);
-
-        // Inflate the menu and configure the media router action provider.
-        getMenuInflater().inflate(R.menu.presentation_vnc_menu, menu);
-
-        MenuItem mediaRouteMenuItem = menu.findItem(R.id.menu_media_route);
-
-        MediaRouteActionProvider mediaRouteActionProvider =
-                (MediaRouteActionProvider)mediaRouteMenuItem.getActionProvider();
-        mediaRouteActionProvider.setRouteTypes(MediaRouter.ROUTE_TYPE_LIVE_VIDEO);
-
-        return true;
-    }
-
     private void updatePresentation() {
-        // Get the current route and its presentation display.
-        MediaRouter.RouteInfo route = mMediaRouter.getSelectedRoute(
-                MediaRouter.ROUTE_TYPE_LIVE_VIDEO);
-        Display presentationDisplay = route != null ? route.getPresentationDisplay() : null;
-
         // Dismiss the current presentation if the display has changed.
-        if (mPresentation != null && mPresentation.getDisplay() != presentationDisplay) {
+        if (mPresentation != null && mPresentation.getDisplay() != mDisplay) {
             Log.i(TAG, "Dismissing presentation because the current route no longer "
                     + "has a presentation display.");
             mPresentation.dismiss();
@@ -94,10 +109,10 @@ public class PresentationActivity extends Activity {
         }
 
         // Show a new presentation if needed.
-        if (mPresentation == null && presentationDisplay != null) {
-            Log.i(TAG, "Showing presentation on display: " + presentationDisplay);
-            InetAddress address = null;
-            mPresentation = new VNCPresentation(this, presentationDisplay, address, "Server", 5901, "superuser");
+        if (mPresentation == null && mDisplay != null) {
+            Log.i(TAG, "Showing presentation on display: " + mDisplay.getName());
+            mPresentation = new VNCPresentation(this, mDisplay, connection);
+            mPresentation.mToastHandler = new ToastHandler();
             mPresentation.setOnDismissListener(mOnDismissListener);
             try {
                 mPresentation.show();
@@ -157,4 +172,22 @@ public class PresentationActivity extends Activity {
                     }
                 }
             };
+
+    public class ToastHandler extends Handler {
+        @Override
+        public void handleMessage(Message message) {
+            int state = message.arg1;
+            switch (state) {
+                case 0:
+                    final String text = message.getData().getString("TEXT");
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(PresentationActivity.this, text, Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                    break;
+            }
+        }
+    }
 }

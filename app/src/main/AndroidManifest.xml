@@ -29,19 +29,29 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="uk.co.mholeys.android.vnc.ServerListActivity" />
         </activity>
-        <activity android:name=".AddServerActivity"
-            android:parentActivityName="uk.co.mholeys.android.vnc.ServerListActivity" />
-        <activity android:name=".EditServerActivity"
-            android:parentActivityName="uk.co.mholeys.android.vnc.ServerListActivity" />
-        <activity android:name=".CastActivity"
-            android:parentActivityName="uk.co.mholeys.android.vnc.ServerListActivity" />
-        <activity android:name=".PresentationActivity"
+        <activity
+            android:name=".AddServerActivity"
+            android:parentActivityName=".ServerListActivity" />
+        <activity
+            android:name=".EditServerActivity"
+            android:parentActivityName=".ServerListActivity" />
+        <activity
+            android:name=".CastActivity"
+            android:parentActivityName=".ServerListActivity" />
+        <activity
+            android:name=".PresentationActivity"
             android:label="@string/title_activity_presentation"
-            android:parentActivityName="uk.co.mholeys.android.vnc.ServerListActivity" />
+            android:parentActivityName=".ServerListActivity" />
+
         <service
             android:name=".CastPresentationService"
             android:enabled="true"
-            android:exported="false"></service>
+            android:exported="false" />
+
+        <activity
+            android:name=".InputActivity"
+            android:label="@string/title_activity_input"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
 </manifest>
