@@ -70,6 +70,7 @@ public class ServerListActivity extends AppCompatActivity {
     CastDevice mSelectedCastDevice;
     boolean mCasting = false;
 
+    DisplayManager.DisplayListener mDisplayListener;
     DisplayManager mDisplayManager;
     ArrayList<Display> mDisplays = new ArrayList<Display>();
     Display mSelectedDisplay = null;
@@ -126,7 +127,7 @@ public class ServerListActivity extends AppCompatActivity {
         // Setup presentation media routing
         mDisplayManager = (DisplayManager) getSystemService(DISPLAY_SERVICE);
 
-        mDisplayManager.registerDisplayListener(new DisplayManager.DisplayListener() {
+        mDisplayListener = new DisplayManager.DisplayListener() {
             @Override
             public void onDisplayAdded(int displayId) {
                 Display d = mDisplayManager.getDisplay(displayId);
@@ -147,7 +148,8 @@ public class ServerListActivity extends AppCompatActivity {
                 mDisplays.remove(mDisplayManager.getDisplay(displayId));
                 mDisplays.add(mDisplayManager.getDisplay(displayId));
             }
-        }, null);
+        };
+        mDisplayManager.registerDisplayListener(mDisplayListener, null);
 
         serverList = (ListView) findViewById(R.id.serverListView);
         listItems = new ArrayAdapter<ServerEntry>(this, R.layout.list_layout);
@@ -217,9 +219,6 @@ public class ServerListActivity extends AppCompatActivity {
             case "Edit":
                 editServerIntent(serverEntry);
                 break;
-/*            case "Cast":
-                castServerIntent(server);
-                break;*/
             default:
                 return false;
         }
@@ -455,6 +454,7 @@ public class ServerListActivity extends AppCompatActivity {
     protected void onStop() {
         // Stop looking for cast devices
         mCastMediaRouter.removeCallback(mCastMediaRouterCallback);
+        mDisplayManager.unregisterDisplayListener(mDisplayListener);
         super.onStop();
     }
 

@@ -65,6 +65,7 @@ public class AndroidMouse implements IMouseManager, View.OnTouchListener, View.O
 
     public AndroidMouse(IUserInterface inf) {
         this.inf = inf;
+        screen = (AndroidScreen) inf.getScreen();
     }
 
     public void mouseMoved(int x, int y) {
@@ -150,6 +151,7 @@ public class AndroidMouse implements IMouseManager, View.OnTouchListener, View.O
 
         switch (action) {
             case (MotionEvent.ACTION_DOWN):
+
                 if (!reset) {
                     long sinceLast = lastClick - System.currentTimeMillis();
                     lastClick = System.currentTimeMillis();
@@ -293,6 +295,8 @@ public class AndroidMouse implements IMouseManager, View.OnTouchListener, View.O
                     screen.update();
                     Log.d("Mouse", "Reset PDOWN. " + "xO:" + xOffset + " yO:" + yOffset + " xC:" + screen.cutX + " yC:" + screen.cutY + " s:" + scale);
                 }
+
+                //FIXME: value of 3 will be called after 4 fingers are lifted, might need a action performed boolean
                 if (pointerCount == 3) {
                     //Toggle keyboard
                     InputMethodManager inputMethodManager =

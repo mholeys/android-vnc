@@ -18,6 +18,7 @@ import android.widget.Toast;
 import uk.co.mholeys.android.vnc.display.AndroidScreen;
 import uk.co.mholeys.android.vnc.input.AndroidKeyboard;
 import uk.co.mholeys.android.vnc.input.AndroidMouse;
+import uk.co.mholeys.android.vnc.input.AndroidMouse2;
 import uk.co.mholeys.vnc.VNCConnectionException;
 import uk.co.mholeys.vnc.data.Encoding;
 import uk.co.mholeys.vnc.data.EncodingSettings;
@@ -39,7 +40,7 @@ public class VncActivity extends AppCompatActivity {
     private AndroidInterface androidInterface;
     private AndroidScreen screen;
     private AndroidDisplay display;
-    private AndroidMouse mouse;
+    private AndroidMouse2 mouse;
     private AndroidKeyboard keyboard;
 
     private boolean keyboardState = false;
@@ -110,7 +111,7 @@ public class VncActivity extends AppCompatActivity {
 
 
         androidInterface = new AndroidInterface(this, new AndroidDisplay(activity, null));
-        mouse = (AndroidMouse) androidInterface.getMouseManager();
+        mouse = (AndroidMouse2) androidInterface.getMouseManager();
         keyboard = (AndroidKeyboard) androidInterface.getKeyboardManager();
 
         RelativeLayout layout = (RelativeLayout) findViewById(R.id.layoutVnc);
@@ -156,8 +157,8 @@ public class VncActivity extends AppCompatActivity {
             mProtoThread.start();
             androidInterface.display.setLayoutParams(new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT));
             layout.addView(androidInterface.display);
-            androidInterface.display.setOnHoverListener(mouse);
             androidInterface.display.setOnTouchListener(mouse);
+            androidInterface.display.setOnHoverListener(mouse);
             androidInterface.display.setOnGenericMotionListener(mouse);
 
 /*            new View.OnTouchListener() {

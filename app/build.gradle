@@ -21,7 +21,7 @@ android {
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile files('libs/vnc-33.jar')
+    compile files('libs/vnc-35.jar')
 
     //Chromecast deps
     compile 'com.android.support:appcompat-v7:24.2.1'

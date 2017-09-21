@@ -10,6 +10,7 @@ import android.util.Log;
 import android.widget.ImageView;
 
 import uk.co.mholeys.android.vnc.input.AndroidMouse;
+import uk.co.mholeys.android.vnc.input.AndroidMouse2;
 import uk.co.mholeys.vnc.display.IDisplay;
 import uk.co.mholeys.vnc.log.Logger;
 
@@ -19,7 +20,7 @@ import uk.co.mholeys.vnc.log.Logger;
 public class AndroidDisplay extends AppCompatImageView implements IDisplay {
 
     public AndroidScreen screen;
-    public AndroidMouse mouse;
+    public AndroidMouse2 mouse;
     boolean running = false;
 
     public AndroidDisplay(Context context, AndroidScreen screen) {

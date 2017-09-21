@@ -5,6 +5,7 @@ import android.graphics.Point;
 
 import uk.co.mholeys.android.vnc.input.AndroidKeyboard;
 import uk.co.mholeys.android.vnc.input.AndroidMouse;
+import uk.co.mholeys.android.vnc.input.AndroidMouse2;
 import uk.co.mholeys.vnc.data.PixelFormat;
 import uk.co.mholeys.vnc.display.IDisplay;
 import uk.co.mholeys.vnc.display.IKeyboardManager;
@@ -23,7 +24,7 @@ public class AndroidInterface implements IUserInterface {
     private UpdateManager updateManager;
     Context context;
     AndroidKeyboard keyboard = new AndroidKeyboard();
-    AndroidMouse mouse = new AndroidMouse(this);
+    AndroidMouse2 mouse = new AndroidMouse2(this);
     public int androidWidth;
     public int androidHeight;
     public PixelFormat format;
@@ -78,8 +79,7 @@ public class AndroidInterface implements IUserInterface {
         display.screen = screen;
         display.mouse = mouse;
 
-        mouse.mouseScaleW = (double)width / (double) androidWidth;
-        mouse.mouseScaleH = (double)height / (double) androidHeight;
+        mouse.setScale((double)width / (double) androidWidth, (double)height / (double) androidHeight);
     }
 
 

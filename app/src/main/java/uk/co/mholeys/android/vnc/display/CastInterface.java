@@ -5,6 +5,7 @@ import android.content.Context;
 import uk.co.mholeys.android.vnc.CastPresentationService;
 import uk.co.mholeys.android.vnc.input.AndroidKeyboard;
 import uk.co.mholeys.android.vnc.input.AndroidMouse;
+import uk.co.mholeys.android.vnc.input.AndroidMouse2;
 import uk.co.mholeys.vnc.data.PixelFormat;
 import uk.co.mholeys.vnc.display.IDisplay;
 import uk.co.mholeys.vnc.display.IKeyboardManager;
@@ -80,7 +81,7 @@ public class CastInterface implements IUserInterface {
             screen = new AndroidScreen(width, height);
         }
         display.screen = screen;
-        display.mouse = mouse;
+        //FIXME display.mouse = mouse;
 
         mouse.mouseScaleW = (double)width / (double) androidWidth;
         mouse.mouseScaleH = (double)height / (double) androidHeight;
