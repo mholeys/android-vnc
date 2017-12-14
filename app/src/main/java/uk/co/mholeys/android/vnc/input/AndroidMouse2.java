@@ -61,11 +61,11 @@ public class AndroidMouse2 implements IMouseManager, View.OnTouchListener, View.
         touchHandler.createScaleGestureDetector(inf);
 
         int action = MotionEventCompat.getActionMasked(event);
-        Log.d(TAG, "Action " + event.getAction() + " " + action);
+        //Log.d(TAG, "Action " + event.getAction() + " " + action);
 
 
         int pointerCount = event.getPointerCount();
-        Log.d(TAG, "PointerCount " + pointerCount);
+        //Log.d(TAG, "PointerCount " + pointerCount);
         int id = MotionEventCompat.getActionIndex(event);
         final int pointerIndex = MotionEventCompat.getActionIndex(event);
 
@@ -82,7 +82,7 @@ public class AndroidMouse2 implements IMouseManager, View.OnTouchListener, View.
         switch (action) {
             case (MotionEvent.ACTION_DOWN):
                 if (pointerCount == 1) {
-                    Log.d(TAG, "1 Finger Down");
+                    //Log.d(TAG, "1 Finger Down");
                     actionPerformed = touchHandler.on1FingerDown(x, y);
                 } else {
                     Log.d(TAG, "Apparently ACTION_DOWN has a different pointer count: " + pointerCount);
@@ -90,7 +90,7 @@ public class AndroidMouse2 implements IMouseManager, View.OnTouchListener, View.
                 break;
             case (MotionEvent.ACTION_UP):
                 if (pointerCount == 1) {
-                    Log.d(TAG, "1 Finger Up");
+                    //Log.d(TAG, "1 Finger Up");
                     actionPerformed = touchHandler.on1FingerUp(x, y);
                 } else {
                     Log.d(TAG, "Apparently ACTION_UP has a different pointer count: " + pointerCount);
@@ -99,15 +99,15 @@ public class AndroidMouse2 implements IMouseManager, View.OnTouchListener, View.
             case (MotionEvent.ACTION_POINTER_DOWN):
                 switch (pointerCount) {
                     case 2:
-                        Log.d(TAG, "2 Finger Down");
+                        //Log.d(TAG, "2 Finger Down");
                         actionPerformed = touchHandler.on2FingerDown(x, y);
                         break;
                     case 3:
-                        Log.d(TAG, "3 Finger Down");
+                        //Log.d(TAG, "3 Finger Down");
                         actionPerformed = touchHandler.on3FingerDown(x, y);
                         break;
                     case 4:
-                        Log.d(TAG, "4 Finger Down");
+                        //Log.d(TAG, "4 Finger Down");
                         actionPerformed = touchHandler.on4FingerDown(x, y);
                         break;
                     default:
@@ -118,15 +118,15 @@ public class AndroidMouse2 implements IMouseManager, View.OnTouchListener, View.
             case (MotionEvent.ACTION_POINTER_UP):
                 switch (pointerCount) {
                     case 2:
-                        Log.d(TAG, "2 Finger Up");
+                        //Log.d(TAG, "2 Finger Up");
                         actionPerformed = touchHandler.on2FingerUp(x, y);
                         break;
                     case 3:
-                        Log.d(TAG, "3 Finger Up");
+                        //Log.d(TAG, "3 Finger Up");
                         actionPerformed = touchHandler.on3FingerUp(x, y);
                         break;
                     case 4:
-                        Log.d(TAG, "4 Finger Up");
+                        //Log.d(TAG, "4 Finger Up");
                         actionPerformed = touchHandler.on4FingerUp(x, y);
                         break;
                     default:
@@ -135,27 +135,27 @@ public class AndroidMouse2 implements IMouseManager, View.OnTouchListener, View.
                 }
                 break;
             case (MotionEvent.ACTION_MOVE):
-                Log.d(TAG, "Move");
+                //Log.d(TAG, "Move");
                 actionPerformed = touchHandler.getScaleGestureDetector().onTouchEvent(event);
                 switch (pointerCount) {
                     case 1:
-                        Log.d(TAG, "1 Finger Drag");
+                        //Log.d(TAG, "1 Finger Drag");
                         actionPerformed = touchHandler.on1FingerDrag(x, y);
                         break;
                     case 2:
-                        Log.d(TAG, "2 Finger Drag");
+                        //Log.d(TAG, "2 Finger Drag");
                         actionPerformed = touchHandler.on2FingerDrag(x, y);
                         break;
                     case 3:
-                        Log.d(TAG, "3 Finger Drag");
+                        //Log.d(TAG, "3 Finger Drag");
                         actionPerformed = touchHandler.on3FingerDrag(x, y);
                         break;
                     case 4:
-                        Log.d(TAG, "4 Finger Drag");
+                        //Log.d(TAG, "4 Finger Drag");
                         actionPerformed = touchHandler.on4FingerDrag(x, y);
                         break;
                     default:
-                        Log.d(TAG, "Apparently ACTION_MOVE has a different pointer count: " + pointerCount);
+                        //Log.d(TAG, "Apparently ACTION_MOVE has a different pointer count: " + pointerCount);
                         break;
                 }
                 break;

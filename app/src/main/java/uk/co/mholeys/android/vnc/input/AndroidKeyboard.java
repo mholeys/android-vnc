@@ -1,7 +1,9 @@
 package uk.co.mholeys.android.vnc.input;
 
+import android.util.Log;
 import android.view.KeyEvent;
 
+import java.security.Key;
 import java.util.LinkedList;
 import java.util.Queue;
 
@@ -14,8 +16,11 @@ import uk.co.mholeys.vnc.display.IKeyboardManager;
 
 public class AndroidKeyboard implements IKeyboardManager {
 
+    final static String TAG = "AKeyboard";
 
     Queue<KeyboardUpdate> keyboardUpdates = new LinkedList<KeyboardUpdate>();
+
+    boolean ctrl, shift, alt, meta;
 
     public void addKey(KeyEvent key, boolean pressed) {
         keyboardUpdates.add(lookupKeyCode(key, pressed));
@@ -33,29 +38,87 @@ public class AndroidKeyboard implements IKeyboardManager {
 
     private KeyboardUpdate lookupKeyCode(KeyEvent e, boolean pressed) {
         int modifier = e.getModifiers();
+
+        // TODO: otherwise remove key checks from case? or integrate into mask check
         if ((modifier & KeyEvent.META_ALT_MASK) > 0) {
-            if ((modifier & KeyEvent.META_ALT_LEFT_ON) > 0)
-                keyboardUpdates.offer(new KeyboardUpdate(0xffe9, pressed));
-            if ((modifier & KeyEvent.META_ALT_RIGHT_ON) > 0)
-                keyboardUpdates.offer(new KeyboardUpdate(0xffea, pressed));
+            if ((modifier & KeyEvent.META_ALT_LEFT_ON) > 0) {
+                keyboardUpdates.offer(new KeyboardUpdate(0xffe9, true));
+                alt = true;
+            } else {
+                if (alt) {
+                    keyboardUpdates.offer(new KeyboardUpdate(0xffe9, false));
+                    alt = false;
+                }
+            }
+            if ((modifier & KeyEvent.META_ALT_RIGHT_ON) > 0) {
+                keyboardUpdates.offer(new KeyboardUpdate(0xffea, true));
+                alt = true;
+            } else {
+                if (alt) {
+                    keyboardUpdates.offer(new KeyboardUpdate(0xffea, false));
+                    alt = false;
+                }
+            }
         }
         if ((modifier & KeyEvent.META_CTRL_MASK) > 0) {
-            if ((modifier & KeyEvent.META_CTRL_LEFT_ON) > 0)
-                keyboardUpdates.offer(new KeyboardUpdate(0xffe3, pressed));
-            if ((modifier & KeyEvent.META_CTRL_RIGHT_ON) > 0)
-                keyboardUpdates.offer(new KeyboardUpdate(0xffe4, pressed));
+            if ((modifier & KeyEvent.META_CTRL_LEFT_ON) > 0) {
+                keyboardUpdates.offer(new KeyboardUpdate(0xffe3, true));
+                ctrl = true;
+            } else {
+                if (ctrl) {
+                    keyboardUpdates.offer(new KeyboardUpdate(0xffe3, false));
+                    ctrl = false;
+                }
+            }
+            if ((modifier & KeyEvent.META_CTRL_RIGHT_ON) > 0) {
+                keyboardUpdates.offer(new KeyboardUpdate(0xffe4, true));
+                ctrl = true;
+            } else {
+                if (ctrl) {
+                    keyboardUpdates.offer(new KeyboardUpdate(0xffe4, false));
+                    ctrl = false;
+                }
+            }
         }
         if ((modifier & KeyEvent.META_META_MASK) > 0) {
-            if ((modifier & KeyEvent.META_META_LEFT_ON) > 0)
-                keyboardUpdates.offer(new KeyboardUpdate(0xffe7, pressed));
-            if ((modifier & KeyEvent.META_META_RIGHT_ON) > 0)
-                keyboardUpdates.offer(new KeyboardUpdate(0xffe8, pressed));
+            if ((modifier & KeyEvent.META_META_LEFT_ON) > 0) {
+                keyboardUpdates.offer(new KeyboardUpdate(0xffe7, true));
+                meta = true;
+            } else {
+                if (meta) {
+                    keyboardUpdates.offer(new KeyboardUpdate(0xffe7, false));
+                    meta = false;
+                }
+            }
+            if ((modifier & KeyEvent.META_META_RIGHT_ON) > 0) {
+                keyboardUpdates.offer(new KeyboardUpdate(0xffe8, true));
+                meta = true;
+            } else {
+                if (meta) {
+                    keyboardUpdates.offer(new KeyboardUpdate(0xffe8, false));
+                    meta = false;
+                }
+            }
         }
         if ((modifier & KeyEvent.META_SHIFT_MASK) > 0) {
-            if ((modifier & KeyEvent.META_SHIFT_LEFT_ON) > 0)
-                keyboardUpdates.offer(new KeyboardUpdate(0xffe1, pressed));
-            if ((modifier & KeyEvent.META_SHIFT_RIGHT_ON) > 0)
-                keyboardUpdates.offer(new KeyboardUpdate(0xffe2, pressed));
+            if ((modifier & KeyEvent.META_SHIFT_LEFT_ON) > 0) {
+                keyboardUpdates.offer(new KeyboardUpdate(0xffe1, true));
+                shift = true;
+            } else {
+                if (shift) {
+                    keyboardUpdates.offer(new KeyboardUpdate(0xffe1, false));
+                    shift = false;
+                }
+            }
+            if ((modifier & KeyEvent.META_SHIFT_RIGHT_ON) > 0) {
+                keyboardUpdates.offer(new KeyboardUpdate(0xffe2, true));
+                shift = true;
+            } else {
+                if (shift) {
+                    keyboardUpdates.offer(new KeyboardUpdate(0xffe1, false));
+                    shift = false;
+                }
+            }
         }
         switch (e.getKeyCode()) {
             case KeyEvent.KEYCODE_DEL:
@@ -68,7 +131,7 @@ public class AndroidKeyboard implements IKeyboardManager {
                 return new KeyboardUpdate(0xff1b, pressed);
             case KeyEvent.KEYCODE_INSERT:
                 return new KeyboardUpdate(0xff63, pressed);
-            case KeyEvent.KEYCODE_HOME:
+            case KeyEvent.KEYCODE_MOVE_HOME:
                 return new KeyboardUpdate(0xff50, pressed);
             case KeyEvent.KEYCODE_DPAD_LEFT:
                 return new KeyboardUpdate(0xff51, pressed);
@@ -108,26 +171,38 @@ public class AndroidKeyboard implements IKeyboardManager {
                 return new KeyboardUpdate(0xffc8, pressed);
             case KeyEvent.KEYCODE_F12:
                 return new KeyboardUpdate(0xffc9, pressed);
-           /* case KeyEvent.META_SHIFT_MASK:
-                if ((modifier & KeyEvent.META_SHIFT_LEFT_ON) > 0)
-                    return new KeyboardUpdate(0xffe1, pressed);
-                if ((modifier & KeyEvent.META_SHIFT_RIGHT_ON) > 0)
-                    return new KeyboardUpdate(0xffe2, pressed);
-            case KeyEvent.VK_CONTROL:
-                if (e.getKeyLocation() == KeyEvent.KEY_LOCATION_LEFT)
-                    return new KeyboardUpdate(0xffe3, pressed);
-                if (e.getKeyLocation() == KeyEvent.KEY_LOCATION_RIGHT)
-                    return new KeyboardUpdate(0xffe4, pressed);
-            case KeyEvent.VK_META:
-                if (e.getKeyLocation() == KeyEvent.KEY_LOCATION_LEFT)
-                    return new KeyboardUpdate(0xffe7, pressed);
-                if (e.getKeyLocation() == KeyEvent.KEY_LOCATION_RIGHT)
-                    return new KeyboardUpdate(0xffe8, pressed);
-            case KeyEvent.VK_ALT:
-                if (e.getKeyLocation() == KeyEvent.KEY_LOCATION_LEFT)
-                    return new KeyboardUpdate(0xffe9, pressed);
-                if (e.getKeyLocation() == KeyEvent.KEY_LOCATION_RIGHT)
-                    return new KeyboardUpdate(0xffea, pressed);*/
+            case KeyEvent.KEYCODE_SHIFT_LEFT:
+            //case KeyEvent.META_SHIFT_LEFT_ON:
+                shift = pressed;
+                return new KeyboardUpdate(0xffe1, pressed);
+            case KeyEvent.KEYCODE_SHIFT_RIGHT:
+            //case KeyEvent.META_SHIFT_RIGHT_ON:
+                shift = pressed;
+                return new KeyboardUpdate(0xffe2, pressed);
+            case KeyEvent.KEYCODE_CTRL_LEFT:
+            //case KeyEvent.META_CTRL_LEFT_ON:
+                ctrl = pressed;
+                return new KeyboardUpdate(0xffe3, pressed);
+            case KeyEvent.KEYCODE_CTRL_RIGHT:
+            //case KeyEvent.META_CTRL_RIGHT_ON:
+                ctrl = pressed;
+                return new KeyboardUpdate(0xffe4, pressed);
+            case KeyEvent.KEYCODE_META_LEFT:
+            //case KeyEvent.META_META_LEFT_ON:
+                meta = pressed;
+                return new KeyboardUpdate(0xffe7, pressed);
+            case KeyEvent.KEYCODE_META_RIGHT:
+            //case KeyEvent.META_META_RIGHT_ON:
+                meta = pressed;
+                return new KeyboardUpdate(0xffe8, pressed);
+            case KeyEvent.KEYCODE_ALT_LEFT:
+            //case KeyEvent.META_ALT_LEFT_ON:
+                alt = pressed;
+                return new KeyboardUpdate(0xffe9, pressed);
+            case KeyEvent.KEYCODE_ALT_RIGHT:
+            //case KeyEvent.META_ALT_RIGHT_ON:
+                alt = pressed;
+                return new KeyboardUpdate(0xffea, pressed);
             case KeyEvent.KEYCODE_FORWARD_DEL:
                 return new KeyboardUpdate(0xffff, pressed);
             default:

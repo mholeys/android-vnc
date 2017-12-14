@@ -3,6 +3,7 @@ package uk.co.mholeys.android.vnc.input;
 import android.content.Context;
 import android.provider.Settings;
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.InputDevice;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
@@ -41,7 +42,7 @@ public class BuiltInDisplayTouchHandler implements ITouchHandler {
 
     private int lastPointerCount;
 
-    private boolean moveMouse;
+    private boolean moveMouse, pan;
 
     private AndroidInterface inf;
     private View view;
@@ -61,13 +62,15 @@ public class BuiltInDisplayTouchHandler implements ITouchHandler {
 
     @Override
     public boolean on1FingerDown(float[] x, float[] y) {
-        long sinceLast = lastClick - System.currentTimeMillis();
+        long sinceLast = System.currentTimeMillis() - lastClick;
         lastClick = System.currentTimeMillis();
+        Log.d("Drag", "1FD mm:" + moveMouse + " x:" + pointerPoint.x + " y:" + pointerPoint.y + " cc:" + clickCount + " sl:" + sinceLast);
         if (sinceLast > 200) {
             clickCount = 0;
-            moveMouse = false;
+            //moveMouse = true;
         } else {
-            moveMouse = true;
+            //clickCount++;
+            //moveMouse = true;
         }
         updateLastPos(x, y);
         return false;
@@ -75,21 +78,24 @@ public class BuiltInDisplayTouchHandler implements ITouchHandler {
 
     @Override
     public boolean on1FingerUp(float[] x, float[] y) {
-        pointerPoint.x = (short) x[0];
-        pointerPoint.y = (short) y[0];
-
+        Log.d("Drag", "1FU mm:" + moveMouse + " x:" + pointerPoint.x + " y:" + pointerPoint.y + " cc:" + clickCount + " sl:" + (System.currentTimeMillis() - lastClick));
         if (!moveMouse) {
-            clickCount++;
+            //pointerPoint.x = (short) x[0];
+            //pointerPoint.y = (short) y[0];
             updateLastPos(x, y);
+            clickCount++;
             switch (clickCount) {
                 case 0:
                     break;
                 case 1:
                     pointerPoint.left = false;
+                    pointerPoint.right = false;
                     break;
                 case 2:
                     pointerPoint.left = true;
-                    clickCount = 0;
+                    break;
+                case 3:
+                    pointerPoint.right = true;
                     break;
                 default:
                     clickCount = 0;
@@ -100,18 +106,24 @@ public class BuiltInDisplayTouchHandler implements ITouchHandler {
         pointerPoint.left = false;
         pointerPoint.right = false;
         miceUpdates.add(pointerPoint.clone());
+        Log.d("Drag", "1FU mm:" + moveMouse + " x:" + pointerPoint.x + " y:" + pointerPoint.y + " cc:" + clickCount + " sl:" + (System.currentTimeMillis() - lastClick));
         return true;
     }
 
     @Override
     public boolean on2FingerDown(float[] x, float[] y) {
+        Log.d("Drag", "2FD");
         return false;
     }
 
     @Override
     public boolean on2FingerUp(float[] x, float[] y) {
-        pointerPoint.x = (short) x[0];
-        pointerPoint.y = (short) y[0];
+        Log.d("Drag", "2FU mm:" + moveMouse + " x:" + pointerPoint.x + " y:" + pointerPoint.y + " cc:" + clickCount + " sl:" + (System.currentTimeMillis() - lastClick));
+        pan = false;
+        if (moveMouse) {
+            pointerPoint.x = (short) x[0];
+            pointerPoint.y = (short) y[0];
+        }
 
         boolean performed = false;
         if (clickCount == 1) {
@@ -152,16 +164,18 @@ public class BuiltInDisplayTouchHandler implements ITouchHandler {
 
     @Override
     public boolean on4FingerUp(float[] x, float[] y) {
-        return false;
+        xOffset = 0;
+        yOffset = 0;
+        scale = 1d;
+        return true;
     }
 
     @Override
     public boolean on1FingerDrag(float[] x, float[] y) {
-        if (moveMouse) {
-            Log.d("Drag", "x: " + pointerPoint.x + " y: " + pointerPoint.y);
-            pointerPoint.x -= (short) (lastX[0] - x[0]);
-            pointerPoint.y -= (short) (lastY[0] - y[0]);
-        }
+        Log.d("Drag", "1FD x: " + pointerPoint.x + " y: " + pointerPoint.y);
+        pointerPoint.x -= (short) (lastX[0] - x[0]);
+        pointerPoint.y -= (short) (lastY[0] - y[0]);
+
         miceUpdates.add(pointerPoint.clone());
         updateLastPos(x, y);
         return moveMouse;
@@ -169,17 +183,19 @@ public class BuiltInDisplayTouchHandler implements ITouchHandler {
 
     @Override
     public boolean on2FingerDrag(float[] x, float[] y) {
-
         // FIXME
         float ax = (float)(x[0] + x[1] / 2.0d);
         float ay = (float)(y[0] + y[1]/ 2.0d);
+        Log.d("Drag", "2FD ax: " + ax + " ay: " + ay);
+        Log.d("Drag", "2FD sx: " + screen.cutX + " sy: " + screen.cutY);
 
-        if (lastScrollX == 0 && lastScrollY == 0) {
-            xOffset = ax;
-            yOffset = ay;
-        } else {
+        if (pan) {
             xOffset = lastScrollX - ax;
             yOffset = lastScrollY - ay;
+        } else {
+            pan = true;
+            xOffset = ax;
+            yOffset = ay;
         }
         screen.cutX -= xOffset;
         screen.cutY -= yOffset;

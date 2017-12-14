@@ -83,6 +83,10 @@ public class AndroidDisplay extends AppCompatImageView implements IDisplay {
         if (cutY < -yLimit) cutY = -yLimit;
         if (cutY > yLimit) cutY = yLimit;
 
+        // Limit the screens movement
+        screen.cutX = cutX;
+        screen.cutY = cutY;
+
         Matrix scaleMatrix = new Matrix();
         Matrix canvasMatrix = new Matrix();
         canvasMatrix.setTranslate(cutX, cutY);

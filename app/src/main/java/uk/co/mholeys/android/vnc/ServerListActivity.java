@@ -111,61 +111,6 @@ public class ServerListActivity extends AppCompatActivity {
                         }).show();
             }
         });
-
-
-
-        // Setup cast button
-        // Get a media router to use
-        mCastMediaRouter = MediaRouter.getInstance(getApplicationContext());
-        // Find a cast device that is compatible
-        mCastMediaRouteSelector = new MediaRouteSelector.Builder()
-                .addControlCategory( CastMediaControlIntent.categoryForCast(REMOTE_DISPLAY_APP_ID))
-                .build();
-        mCastMediaRouterCallback = new MyMediaRouterCallback();
-
-
-        // Setup presentation media routing
-        mDisplayManager = (DisplayManager) getSystemService(DISPLAY_SERVICE);
-
-        mDisplayListener = new DisplayManager.DisplayListener() {
-            @Override
-            public void onDisplayAdded(int displayId) {
-                Display d = mDisplayManager.getDisplay(displayId);
-                Log.d("DisplayListener", "Adding a display");
-                mDisplays.add(d);
-            }
-
-            @Override
-            public void onDisplayRemoved(int displayId) {
-                Display d = mDisplayManager.getDisplay(displayId);
-                Log.d("DisplayListener", "Removing a display");
-                mDisplays.remove(d);
-            }
-
-            @Override
-            public void onDisplayChanged(int displayId) {
-                Log.d("DisplayListener", "Updating a display");
-                mDisplays.remove(mDisplayManager.getDisplay(displayId));
-                mDisplays.add(mDisplayManager.getDisplay(displayId));
-            }
-        };
-        mDisplayManager.registerDisplayListener(mDisplayListener, null);
-
-        serverList = (ListView) findViewById(R.id.serverListView);
-        listItems = new ArrayAdapter<ServerEntry>(this, R.layout.list_layout);
-
-        loadServers();
-
-        serverList.setOnCreateContextMenuListener(this);
-
-        serverList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                //Open up vnc
-                ServerData server = ((ServerEntry)adapterView.getAdapter().getItem(i)).serverData;
-                startVncViewer(server);
-            }
-        });
     }
 
     @Override
@@ -182,24 +127,6 @@ public class ServerListActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        // Look for cast devices
-        mCastMediaRouter.addCallback(mCastMediaRouteSelector, mCastMediaRouterCallback,
-                MediaRouter.CALLBACK_FLAG_REQUEST_DISCOVERY);
-        // Remove previously selected display
-        mSelectedDisplay = null;
-        // Clear list of displays
-        mDisplays.clear();
-
-        // Re-add built in display
-        if (!mDisplays.contains(getWindow().getWindowManager().getDefaultDisplay())) {
-            mDisplays.add(getWindow().getWindowManager().getDefaultDisplay());
-        }
-
-        // Add all displays
-        for (Display d : mDisplayManager.getDisplays(DisplayManager.DISPLAY_CATEGORY_PRESENTATION)) {
-            Log.d(TAG, "Adding a display");
-            mDisplays.add(d);
-        }
     }
 
     @Override
@@ -450,12 +377,98 @@ public class ServerListActivity extends AppCompatActivity {
         mCasting = false;
     }
 
-    @Override
-    protected void onStop() {
+    protected void onResume() {
+        super.onResume();
+
+
+        // Setup server list
+        serverList = (ListView) findViewById(R.id.serverListView);
+        listItems = new ArrayAdapter<ServerEntry>(this, R.layout.list_layout);
+
+        serverList.setOnCreateContextMenuListener(this);
+
+        serverList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                //Open up vnc
+                ServerData server = ((ServerEntry)adapterView.getAdapter().getItem(i)).serverData;
+                startVncViewer(server);
+            }
+        });
+
+        loadServers();
+        setupDisplays();
+    }
+
+    protected void onPause() {
         // Stop looking for cast devices
         mCastMediaRouter.removeCallback(mCastMediaRouterCallback);
         mDisplayManager.unregisterDisplayListener(mDisplayListener);
+        super.onPause();
+    }
+
+    @Override
+    protected void onStop() {
         super.onStop();
+    }
+
+    protected void setupDisplays() {
+        // Setup cast button
+        // Get a media router to use
+        mCastMediaRouter = MediaRouter.getInstance(getApplicationContext());
+        // Find a cast device that is compatible
+        mCastMediaRouteSelector = new MediaRouteSelector.Builder()
+                .addControlCategory( CastMediaControlIntent.categoryForCast(REMOTE_DISPLAY_APP_ID))
+                .build();
+        mCastMediaRouterCallback = new MyMediaRouterCallback();
+
+
+        // Setup presentation media routing
+        mDisplayManager = (DisplayManager) getSystemService(DISPLAY_SERVICE);
+
+        mDisplayListener = new DisplayManager.DisplayListener() {
+            @Override
+            public void onDisplayAdded(int displayId) {
+                Display d = mDisplayManager.getDisplay(displayId);
+                Log.d("DisplayListener", "Adding a display");
+                mDisplays.add(d);
+            }
+
+            @Override
+            public void onDisplayRemoved(int displayId) {
+                Display d = mDisplayManager.getDisplay(displayId);
+                Log.d("DisplayListener", "Removing a display");
+                mDisplays.remove(d);
+            }
+
+            @Override
+            public void onDisplayChanged(int displayId) {
+                Log.d("DisplayListener", "Updating a display");
+                mDisplays.remove(mDisplayManager.getDisplay(displayId));
+                mDisplays.add(mDisplayManager.getDisplay(displayId));
+            }
+        };
+        mDisplayManager.registerDisplayListener(mDisplayListener, null);
+
+
+        // Look for cast devices
+        mCastMediaRouter.addCallback(mCastMediaRouteSelector, mCastMediaRouterCallback,
+                MediaRouter.CALLBACK_FLAG_REQUEST_DISCOVERY);
+        // Remove previously selected display
+        mSelectedDisplay = null;
+        // Clear list of displays
+        mDisplays.clear();
+
+        // Re-add built in display
+        if (!mDisplays.contains(getWindow().getWindowManager().getDefaultDisplay())) {
+            mDisplays.add(getWindow().getWindowManager().getDefaultDisplay());
+        }
+
+        // Add all displays
+        for (Display d : mDisplayManager.getDisplays(DisplayManager.DISPLAY_CATEGORY_PRESENTATION)) {
+            Log.d(TAG, "Adding a display");
+            mDisplays.add(d);
+        }
     }
 
     private class MyMediaRouterCallback extends MediaRouter.Callback {

@@ -27,6 +27,7 @@ import uk.co.mholeys.vnc.net.VNCProtocol;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.SocketException;
 
 import uk.co.mholeys.android.vnc.display.AndroidDisplay;
 import uk.co.mholeys.android.vnc.display.AndroidInterface;
@@ -139,6 +140,14 @@ public class VncActivity extends AppCompatActivity {
                                     Toast.makeText(activity, reason, Toast.LENGTH_SHORT).show();
                                 }
                             });
+                        } catch (SocketException e) {
+                            activity.runOnUiThread(new Runnable() {
+                                public void run() {
+                                    Toast.makeText(activity, "Connection ended unexpectedly", Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                            Intent i = new Intent(activity, ServerListActivity.class);
+                            activity.startActivity(i);
                         } catch (IOException e) {
                             activity.runOnUiThread(new Runnable() {
                                 public void run() {
@@ -178,7 +187,7 @@ public class VncActivity extends AppCompatActivity {
         if (protocol != null) {
             if (protocol.ui != null) {
                 if (protocol.ui.getKeyboardManager() != null) {
-                    Log.d("VNCActivity", "Key pressed: " + code + " " + e.getModifiers());
+                    //Log.d("VNCActivity", "Key pressed: " + code + " " + e.getModifiers());
                     ((AndroidKeyboard)protocol.ui.getKeyboardManager()).addKey(e, true);
                     return true;
                 }
@@ -194,7 +203,7 @@ public class VncActivity extends AppCompatActivity {
         if (protocol != null) {
             if (protocol.ui != null) {
                 if (protocol.ui.getKeyboardManager() != null) {
-                    Log.d("VNCActivity", "Key pressed: " + code + " " + e.getModifiers());
+                    //Log.d("VNCActivity", "Key pressed: " + code + " " + e.getModifiers());
                     ((AndroidKeyboard) protocol.ui.getKeyboardManager()).addKey(e, false);
                     return true;
                 }
