@@ -24,6 +24,7 @@ import uk.co.mholeys.android.vnc.ServerData;
 import uk.co.mholeys.android.vnc.ServerListActivity;
 import uk.co.mholeys.android.vnc.input.AndroidKeyboard;
 import uk.co.mholeys.android.vnc.input.AndroidMouse;
+import uk.co.mholeys.android.vnc.input.AndroidMouse2;
 import uk.co.mholeys.vnc.VNCConnectionException;
 import uk.co.mholeys.vnc.data.Encoding;
 import uk.co.mholeys.vnc.data.EncodingSettings;
@@ -47,7 +48,7 @@ public class VNCPresentation extends Presentation {
     private AndroidInterface androidInterface;
     private AndroidScreen vncScreen;
     private AndroidDisplay vncDisplay;
-    private AndroidMouse mouse;
+    private AndroidMouse2 mouse;
     private AndroidKeyboard keyboard;
 
     private boolean keyboardState = false;
@@ -99,7 +100,7 @@ public class VNCPresentation extends Presentation {
 
 
         androidInterface = new AndroidInterface(outerConext, new AndroidDisplay(outerConext, null));
-        mouse = (AndroidMouse) androidInterface.getMouseManager();
+        mouse = (AndroidMouse2) androidInterface.getMouseManager();
         keyboard = (AndroidKeyboard) androidInterface.getKeyboardManager();
 
         RelativeLayout layout = (RelativeLayout) findViewById(R.id.layoutVnc);

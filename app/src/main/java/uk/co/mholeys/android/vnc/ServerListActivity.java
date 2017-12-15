@@ -39,6 +39,8 @@ import com.google.android.gms.cast.CastRemoteDisplayLocalService;
 import com.google.android.gms.common.api.Status;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 import uk.co.mholeys.android.vnc.data.SQLHelper;
 import uk.co.mholeys.android.vnc.data.ServerEntry;
@@ -211,14 +213,49 @@ public class ServerListActivity extends AppCompatActivity {
             // Show display picker dialog
             AlertDialog.Builder builder = new AlertDialog.Builder(ServerListActivity.this);
             builder.setTitle(R.string.display_list_select_title);
-            String[] displayNames = new String[mDisplays.size()];
-            for (int i = 0; i < mDisplays.size(); i++) {
-                displayNames[i] = mDisplays.get(i).getName();
+            List<MediaRouter.RouteInfo> castRoutes = mCastMediaRouter.getRoutes();
+            Log.d("Cast menu", ""+castRoutes.size());
+
+            int castDevices = 0;
+            for (int i = 0; i < castRoutes.size(); i++) {
+                if (castRoutes.get(i).getDeviceType() == MediaRouter.RouteInfo.DEVICE_TYPE_TV) {
+                    castDevices++;
+                }
             }
+
+            final String[] displayNames = new String[castDevices + mDisplays.size()];
+            final HashMap<String, Object> displays = new HashMap<String, Object>();
+            int c = 0;
+            for (MediaRouter.RouteInfo r : castRoutes) {
+                if (r.getDeviceType() == MediaRouter.RouteInfo.DEVICE_TYPE_TV) {
+                    displayNames[c] = r.getName();
+                    displays.put(displayNames[c], r);
+                    c++;
+                }
+            }
+            for (int i = 0; i < mDisplays.size(); i++) {
+                displayNames[i + castDevices] = mDisplays.get(i).getName();
+                displays.put(mDisplays.get(i).getName(), mDisplays.get(i));
+            }
+            final int castDeviceOffset = castDevices;
             builder.setItems(displayNames, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int which) {
-                    mSelectedDisplay = mDisplays.get(which);
-                    startVncPresentation(server, mSelectedDisplay);
+                    String name = displayNames[which];
+
+                    if (displays.get(name) instanceof Display) {
+                        if (mDisplays.get(which-castDeviceOffset).equals(getWindowManager().getDefaultDisplay())) {
+                            startVncBuiltInDisplay(server);
+                            return;
+                        }
+                        mSelectedDisplay = mDisplays.get(which-castDeviceOffset);
+                        startVncPresentation(server, mSelectedDisplay);
+                        return;
+                    } else if (displays.get(name) instanceof MediaRouter.RouteInfo) {
+                        MediaRouter.RouteInfo routeInfo = (MediaRouter.RouteInfo) displays.get(name);
+                        mSelectedCastDevice = CastDevice.getFromBundle(routeInfo.getExtras());
+                        startCastViewer(server);
+                        return;
+                    }
                 }
             });
             AlertDialog dialog = builder.create();
