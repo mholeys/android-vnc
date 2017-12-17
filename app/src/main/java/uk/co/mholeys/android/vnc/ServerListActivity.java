@@ -273,16 +273,13 @@ public class ServerListActivity extends AppCompatActivity {
         }
         Toast.makeText(this, "Vnc presentation mode started", Toast.LENGTH_LONG).show();
         // Start presentation
-        Intent intent = new Intent(this, PresentationActivity.class);
+        Intent intent = new Intent(this, ExternalInputActivity.class);
         intent.putExtra(SERVER_INFO_CONNECTION, server.inetAddress);
         intent.putExtra(SERVER_INFO_ADDRESS, server.address);
         intent.putExtra(SERVER_INFO_PORT, server.port);
         intent.putExtra(SERVER_INFO_PASSWORD, server.password);
         intent.putExtra(PRESENTATION_DISPLAY_ID, mSelectedDisplay.getDisplayId());
         startActivity(intent);
-
-        // Start input activity
-        //startInputActivity(DISPLAY_MODE_PRESENTATION);
     }
 
     public void startVncBuiltInDisplay(final ServerData server) {
@@ -309,12 +306,11 @@ public class ServerListActivity extends AppCompatActivity {
 
         PendingIntent notificationPendingIntent = PendingIntent.getActivity(
                 ServerListActivity.this, 0, intent, 0);
-        
+
+        // TODO: improve notification if possible without v3/caf
         CastRemoteDisplayLocalService.NotificationSettings settings =
                 new CastRemoteDisplayLocalService.NotificationSettings.Builder()
                         .setNotificationPendingIntent(notificationPendingIntent).build();
-
-
 
         CastRemoteDisplayLocalService.startService(
                 getApplicationContext(),
@@ -348,15 +344,8 @@ public class ServerListActivity extends AppCompatActivity {
                         initError(errorReason);
                     }
                 });
-        startInputActivity(DISPLAY_MODE_CAST);
-    }
-
-    public void startInputActivity(int mode) {
-        Intent inputIntent = new Intent(this, InputActivity.class);
-        inputIntent.putExtra(DISPLAY_MODE, mode);
-        if (mode == DISPLAY_MODE_PRESENTATION) {
-            inputIntent.putExtra(PRESENTATION_DISPLAY_ID, mSelectedDisplay.getDisplayId());
-        }
+        //TODO: change to not need any params in input activity
+        Intent inputIntent = new Intent(this, CastInputActivity.class);
         startActivity(inputIntent);
     }
 

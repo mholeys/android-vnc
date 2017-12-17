@@ -36,9 +36,6 @@
             android:name=".EditServerActivity"
             android:parentActivityName=".ServerListActivity" />
         <activity
-            android:name=".CastActivity"
-            android:parentActivityName=".ServerListActivity" />
-        <activity
             android:name=".PresentationActivity"
             android:label="@string/title_activity_presentation"
             android:parentActivityName=".ServerListActivity" />
@@ -49,7 +46,11 @@
             android:exported="false" />
 
         <activity
-            android:name=".InputActivity"
+            android:name=".CastInputActivity"
+            android:label="@string/title_activity_input"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
+        <activity
+            android:name=".ExternalInputActivity"
             android:label="@string/title_activity_input"
             android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>

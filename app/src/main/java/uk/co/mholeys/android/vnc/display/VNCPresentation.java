@@ -5,6 +5,7 @@ import android.app.Presentation;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
@@ -46,15 +47,13 @@ public class VNCPresentation extends Presentation {
     private boolean mReady = true;
     private ServerData connection;
     private AndroidInterface androidInterface;
-    private AndroidScreen vncScreen;
-    private AndroidDisplay vncDisplay;
-    private AndroidMouse2 mouse;
-    private AndroidKeyboard keyboard;
+    public AndroidMouse2 mouse;
+    public AndroidKeyboard keyboard;
 
     private boolean keyboardState = false;
 
     private View mDecorView;
-    public PresentationActivity.ToastHandler mToastHandler;
+    public Handler mToastHandler;
 
     public VNCPresentation(Context outerContext, Display display, ServerData connection) {
         super(outerContext, display);
@@ -66,6 +65,10 @@ public class VNCPresentation extends Presentation {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        onResume();
+    }
+
+    public void onResume() {
         setContentView(R.layout.activity_vnc);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
@@ -106,51 +109,71 @@ public class VNCPresentation extends Presentation {
         RelativeLayout layout = (RelativeLayout) findViewById(R.id.layoutVnc);
 
         if (mReady) {
-            mProtoThread = new Thread() {
-                @Override
-                public void run() {
-                    if (Looper.myLooper() == null) {
-                        Looper.prepare();
-                        Looper l = Looper.myLooper();
+            if (mProtoThread == null || !mProtoThread.isAlive()) {
+                    mProtoThread = new Thread() {
+                        @Override
+                        public void run() {
+                            if (Looper.myLooper() == null) {
+                                Looper.prepare();
+                                Looper l = Looper.myLooper();
 
-                        try {
-                            protocol = new VNCProtocol(connection, androidInterface, logger);
-                            protocol.run();
-                        } catch (VNCConnectionException e) {
-                            final String reason = e.toString();
-                            Log.e(TAG, "Proto error: \" " + reason + "\"");
-                            Message m = new Message();
-                            m.arg1 = 0;
-                            Bundle b = new Bundle();
-                            b.putString("TEXT", reason);
-                            m.setData(b);
-                            mToastHandler.sendMessage(m);
-                            
-                        } catch (IOException e) {
-                            Log.e(TAG, "Could not connect to " + connection.address + ":" + connection.port);
-                            Message m = new Message();
-                            m.arg1 = 0;
-                            Bundle b = new Bundle();
-                            b.putString("TEXT", "Could not connect to " + connection.address + ":" + connection.port);
-                            m.setData(b);
-                            mToastHandler.sendMessage(m);
-                        } catch (NullPointerException e) {
-                            e.printStackTrace();
+                                while (connection.result != -1) {
+                                    try {
+                                        Thread.sleep(50);
+                                    } catch (InterruptedException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                                try {
+                                    Thread.sleep(100);
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                }
+
+                                if (connection.getAddress() == null || connection.result == 0) {
+                                    Log.e(TAG, "Failed to get InetAddress");
+                                    Message m = new Message();
+                                    m.arg1 = 1;
+                                    Bundle b = new Bundle();
+                                    b.putString("TEXT", "Lookup failed");
+                                    m.setData(b);
+                                    mToastHandler.sendMessage(m);
+                                    return;
+                                }
+
+                                try {
+                                    protocol = new VNCProtocol(connection, androidInterface, logger);
+                                    protocol.run();
+                                } catch (VNCConnectionException e) {
+                                    final String reason = e.toString();
+                                    Log.e(TAG, "Proto error: \" " + reason + "\"");
+                                    Message m = new Message();
+                                    m.arg1 = 0;
+                                    Bundle b = new Bundle();
+                                    b.putString("TEXT", reason);
+                                    m.setData(b);
+                                    mToastHandler.sendMessage(m);
+
+
+                                } catch (IOException e) {
+                                    Log.e(TAG, "Could not connect to " + connection.address + ":" + connection.port);
+                                    Message m = new Message();
+                                    m.arg1 = 0;
+                                    Bundle b = new Bundle();
+                                    b.putString("TEXT", "Could not connect to " + connection.address + ":" + connection.port);
+                                    m.setData(b);
+                                    mToastHandler.sendMessage(m);
+                                } catch (NullPointerException e) {
+                                    e.printStackTrace();
+                                }
+                                l.quit();
+                            }
                         }
-                        l.quit();
-                    }
-                }
-            };
-            mProtoThread.start();
+                    };
+                mProtoThread.start();
+            }
             androidInterface.display.setLayoutParams(new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT));
             layout.addView(androidInterface.display);
-            androidInterface.display.setOnTouchListener(mouse);
-            /*new View.OnTouchListener() {
-                @Override
-                public boolean onTouch(View v, MotionEvent event) {
-                    return onTouchEvent(event);
-                }
-            });*/
         }
     }
 

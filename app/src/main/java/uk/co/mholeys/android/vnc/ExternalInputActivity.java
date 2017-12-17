@@ -1,20 +1,14 @@
 package uk.co.mholeys.android.vnc;
 
-import android.app.Activity;
-import android.app.MediaRouteActionProvider;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.hardware.display.DisplayManager;
-import android.os.Bundle;
 import android.media.MediaRouter;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 import android.view.Display;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
 import android.view.WindowManager;
 import android.widget.Toast;
 
@@ -22,9 +16,13 @@ import java.net.InetAddress;
 
 import uk.co.mholeys.android.vnc.display.VNCPresentation;
 
-public class PresentationActivity extends Activity {
+/**
+ * Created by Matthew on 17/12/2017.
+ */
 
-    private final String TAG = "PresentationActivity";
+public class ExternalInputActivity extends InputActivity {
+
+    private final String TAG = "ExtnInput";
 
     private ServerData connection;
     private VNCPresentation mPresentation;
@@ -32,28 +30,58 @@ public class PresentationActivity extends Activity {
     private Display mDisplay;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setupPresentation();
     }
 
-
     @Override
-    protected void onResume() {
+    public void onResume() {
         super.onResume();
-        updatePresentation();
+        setupPresentation();
     }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-        updateContents();
+    private void setupPresentation() {
+        Log.d(TAG, "setupPresentation: Updating");
+        Intent intent = getIntent();
+        int displayId = intent.getIntExtra(ServerListActivity.PRESENTATION_DISPLAY_ID, -1);
+        if (displayId == -1) {
+            returnToServerList();
+            Log.d(TAG, "onResume: Invalid display id so cannot render, returning to server list");
+            return;
+        }
+        mDisplayManager = (DisplayManager) getSystemService(DISPLAY_SERVICE);
+        mDisplay = mDisplayManager.getDisplay(displayId);
+
+        connection = new ServerData();
+        connection.inetAddress = (InetAddress) intent.getSerializableExtra(ServerListActivity.SERVER_INFO_CONNECTION);
+        connection.address = intent.getStringExtra(ServerListActivity.SERVER_INFO_ADDRESS);
+        connection.port = intent.getIntExtra(ServerListActivity.SERVER_INFO_PORT, 0);
+        connection.password = intent.getStringExtra(ServerListActivity.SERVER_INFO_PASSWORD);
+
+        connection.prepare();
+
+        updatePresentation();
+
+        if (mPresentation != null) {
+            mPresentation.onResume();
+
+            layout.setOnTouchListener(mPresentation.mouse);
+            layout.setOnHoverListener(mPresentation.mouse);
+            layout.setOnGenericMotionListener(mPresentation.mouse);
+        } else {
+            returnToServerList();
+        }
+    }
+
+    private void returnToServerList() {
+        Intent serverListIntent = new Intent(ExternalInputActivity.this, ServerListActivity.class);
+        startActivity(serverListIntent);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-
-
 
         if (mPresentation != null) {
             Log.i(TAG, "Dismissing presentation because the activity is no longer visible.");
@@ -75,7 +103,7 @@ public class PresentationActivity extends Activity {
         if (mPresentation == null && mDisplay != null) {
             Log.i(TAG, "Showing presentation on display: " + mDisplay.getName());
             mPresentation = new VNCPresentation(this, mDisplay, connection);
-            mPresentation.mToastHandler = new ToastHandler();
+            mPresentation.mToastHandler = new ExternalInputActivity.ToastHandler();
             mPresentation.setOnDismissListener(mOnDismissListener);
             try {
                 mPresentation.show();
@@ -93,6 +121,8 @@ public class PresentationActivity extends Activity {
     private void updateContents() {
         // Show either the content in the main activity or the content in the presentation
         // along with some descriptive text about what is happening.
+        // TODO: decide if this should just kick back to main server list?
+        // TODO: make this do what it says
         if (mPresentation != null) {
             Log.i(TAG, "Remote" + mPresentation.getDisplay().getName());
         } else {
@@ -146,11 +176,14 @@ public class PresentationActivity extends Activity {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            Toast.makeText(PresentationActivity.this, text, Toast.LENGTH_SHORT).show();
+                            Toast.makeText(ExternalInputActivity.this, text, Toast.LENGTH_SHORT).show();
                         }
                     });
                     break;
+                case 1:
+                    returnToServerList();
             }
         }
     }
+
 }
