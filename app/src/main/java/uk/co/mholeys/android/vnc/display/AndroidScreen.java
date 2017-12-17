@@ -41,7 +41,6 @@ public class AndroidScreen implements IScreen {
     public double cutHeight = 0;
     public float cutX = 0;
     public float cutY = 0;
-    int[] pixels;
 
     public AndroidScreen(int width, int height) {
         setSize(width, height);
@@ -61,6 +60,8 @@ public class AndroidScreen implements IScreen {
     public void drawPalette(int x, int y, int width, int height, int[] palette, int paletteSize, byte[] data) {
         if (2 == paletteSize) {
             int dx, dy, n;
+            int xA = x;
+            int yA = y;
             int i = y * this.width + x;
             int rowBytes = (width + 7) / 8;
             byte b;
@@ -69,13 +70,17 @@ public class AndroidScreen implements IScreen {
                 for (dx = 0; dx < width / 8; dx++) {
                     b = data[dy * rowBytes + dx];
                     for (n = 7; n >= 0; n--) {
-                        x = i % this.width;
-                        y = i / this.width;
-                        bitmap.setPixel(x, y, palette[b >> n & 1]);
+                        xA = i % this.width;
+                        yA = i / this.width;
+                        i++;
+                        bitmap.setPixel(xA, yA, palette[b >> n & 1]);
                     }
                 }
                 for (n = 7; n >= 8 - width % 8; n--) {
-                    bitmap.setPixel(x, y, palette[data[dy * rowBytes + dx] >> n & 1]);
+                    xA = i % this.width;
+                    yA = i / this.width;
+                    i++;
+                    bitmap.setPixel(xA, yA, palette[data[dy * rowBytes + dx] >> n & 1]);
                 }
                 i += this.width - width;
             }
@@ -116,7 +121,7 @@ public class AndroidScreen implements IScreen {
     public void fillPixels(int x, int y, int width, int height, int color) {
         Canvas canvas = new Canvas(bitmap);
         Paint c = new Paint();
-        c.setColor(color);
+        c.setColor(color | 0xFF000000);
         canvas.drawRect(x, y, x+width, y+height, c);
         fpsCounter();
     }
@@ -136,7 +141,7 @@ public class AndroidScreen implements IScreen {
         this.height = height;
         bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         bitmap.setHasAlpha(false);
-        pixels = new int[width * height];
+        bitmap.setPremultiplied(false);
     }
 
     @Override
