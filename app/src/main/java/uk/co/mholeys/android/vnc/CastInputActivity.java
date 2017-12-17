@@ -29,6 +29,8 @@ public class CastInputActivity extends InputActivity {
             layout.setOnHoverListener(pService.mouse);
             layout.setOnTouchListener(pService.mouse);
             layout.setOnGenericMotionListener(pService.mouse);
+        } else {
+            Log.d(TAG, "onResume: Failed to init input handlers, input might be broken");
         }
     }
 

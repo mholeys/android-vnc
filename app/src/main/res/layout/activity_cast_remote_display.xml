@@ -4,6 +4,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="uk.co.mholeys.android.vnc.CastActivity">
+    tools:context="uk.co.mholeys.android.vnc.CastInputActivity">
 
 </android.support.constraint.ConstraintLayout>
