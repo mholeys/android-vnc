@@ -1,9 +1,7 @@
 package uk.co.mholeys.android.vnc.display;
 
-import android.app.Activity;
 import android.app.Presentation;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -13,18 +11,13 @@ import android.view.Display;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.RelativeLayout;
-import android.widget.Toast;
 
 import java.io.IOException;
-import java.net.InetAddress;
 
 import uk.co.mholeys.android.vnc.LoggerOutStream;
-import uk.co.mholeys.android.vnc.PresentationActivity;
 import uk.co.mholeys.android.vnc.R;
 import uk.co.mholeys.android.vnc.ServerData;
-import uk.co.mholeys.android.vnc.ServerListActivity;
 import uk.co.mholeys.android.vnc.input.AndroidKeyboard;
-import uk.co.mholeys.android.vnc.input.AndroidMouse;
 import uk.co.mholeys.android.vnc.input.AndroidMouse2;
 import uk.co.mholeys.vnc.VNCConnectionException;
 import uk.co.mholeys.vnc.data.Encoding;

@@ -4,7 +4,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Point;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Looper;
+import android.os.Message;
 import android.util.Log;
 import android.view.Display;
 import android.view.WindowManager;
@@ -17,6 +19,7 @@ import com.google.android.gms.cast.CastPresentation;
 import com.google.android.gms.cast.CastRemoteDisplayLocalService;
 
 import java.io.IOException;
+import java.net.SocketException;
 
 import uk.co.mholeys.android.vnc.display.AndroidDisplay;
 import uk.co.mholeys.android.vnc.display.AndroidInterface;
@@ -44,6 +47,7 @@ public class CastPresentationService extends CastRemoteDisplayLocalService {
     AndroidDisplay display;
     AndroidMouse mouse;
     AndroidKeyboard keyboard;
+    public Handler mToastHandler;
 
     public CastPresentationService() {
 
@@ -171,21 +175,30 @@ public class CastPresentationService extends CastRemoteDisplayLocalService {
                                 protocol.run();
                             } catch (VNCConnectionException e) {
                                 final String reason = e.toString();
-                                Log.d(TAG, reason);
-                                /*getContext().runOnUiThread(new Runnable() {
-                                    public void run() {
-                                        Toast.makeText(activity, reason, Toast.LENGTH_SHORT).show();
-                                    }
-                                });*/
+                                Log.e(TAG, "Proto error: \" " + reason + "\"");
+                                Message m = new Message();
+                                m.arg1 = 0;
+                                Bundle b = new Bundle();
+                                b.putString("TEXT", reason);
+                                m.setData(b);
+                                mToastHandler.sendMessage(m);
+                            } catch (SocketException e) {
+                                final String reason = e.toString();
+                                Log.e(TAG, "Connection ended unexpectedly");
+                                Message m = new Message();
+                                m.arg1 = 2;
+                                Bundle b = new Bundle();
+                                b.putString("TEXT", reason);
+                                m.setData(b);
+                                mToastHandler.sendMessage(m);
                             } catch (IOException e) {
-                                Log.d(TAG, "Could not connect to " + connection.address + ":" + connection.port);
-                                /*activity.runOnUiThread(new Runnable() {
-                                    public void run() {
-                                        Toast.makeText(activity, "Could not connect to ", Toast.LENGTH_SHORT).show();
-                                    }
-                                });*/
-                                Intent i = new Intent(getContext(), ServerListActivity.class);
-                                getContext().startActivity(i);
+                                Log.e(TAG, "Could not connect to " + connection.address + ":" + connection.port);
+                                Message m = new Message();
+                                m.arg1 = 0;
+                                Bundle b = new Bundle();
+                                b.putString("TEXT", "Could not connect to " + connection.address + ":" + connection.port);
+                                m.setData(b);
+                                mToastHandler.sendMessage(m);
                             } catch (NullPointerException e) {
                                 e.printStackTrace();
                             }
