@@ -92,6 +92,8 @@ public class PresentationActivity extends Activity {
     protected void onStop() {
         super.onStop();
 
+
+
         if (mPresentation != null) {
             Log.i(TAG, "Dismissing presentation because the activity is no longer visible.");
             mPresentation.dismiss();

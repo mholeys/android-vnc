@@ -51,7 +51,7 @@ public class CastPresentationService extends CastRemoteDisplayLocalService {
 
     @Override
     public void onCreatePresentation(Display display) {
-        // Setup vnc thing maybe?
+        // Setup vnc thing maybe
         createPresentation(display);
     }
 
@@ -70,7 +70,26 @@ public class CastPresentationService extends CastRemoteDisplayLocalService {
     }
 
     private void createPresentation(Display display) {
+        // Stop old presentation
         dismissPresentation();
+
+        // Get connection info ready
+        if (connection.result == -1) {
+            Log.d(TAG, "onCreate: waiting for connection lookup");
+            connection.prepare();
+            while (connection.result == -1) {
+                Log.d(TAG, "onCreate: waiting for connection lookup " + connection.result);
+                try {
+                    Thread.sleep(50);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        } else {
+            Log.d(TAG, "onCreate: Connection is pre-prepared");
+        }
+
+        Log.d(TAG, "createPresentation: Attempting to create vnc presentation");
         mPresentation = new VNCPresentation(this, display, connection);
         try {
             mPresentation.show();
@@ -87,6 +106,8 @@ public class CastPresentationService extends CastRemoteDisplayLocalService {
         private boolean mReady = true;
         private Display castDdisplay;
 
+        private static final String TAG = "VNC.pres.cast";
+
         public VNCPresentation(Context context,
                                Display display, ServerData connection) {
             super(context, display);
@@ -100,42 +121,29 @@ public class CastPresentationService extends CastRemoteDisplayLocalService {
             setContentView(R.layout.presentation_layout);
 
             // Start vnc stuff
-
             final Logger logger = new Logger(new LoggerOutStream());
             logger.logLevel = Logger.LOG_LEVEL_NONE;
 
-            while (connection.result != -1) {
-                try {
-                    Thread.sleep(50);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-
             if (connection.getAddress() == null) {
-                Logger.logger.printLn("CAST: Failed to connect to host");
+                Log.d(TAG, "Could not find address " + connection.address);
                 mReady = false;
             }
+
+            Log.d(TAG, "Found address " + connection.address);
 
             final ServerData connection = this.connection;
             EncodingSettings preferedEncoding = new EncodingSettings()
                     .addEncoding(Encoding.TIGHT_ENCODING)
                     .addEncoding(Encoding.ZLIB_ENCODING)
-                    .addEncoding(Encoding.CORRE_ENCODING)
-                    .addEncoding(Encoding.RRE_ENCODING)
+                    //.addEncoding(Encoding.CORRE_ENCODING)
+                    //.addEncoding(Encoding.RRE_ENCODING)
                     .addEncoding(Encoding.RAW_ENCODING)
                     .addEncoding(Encoding.JPEG_QUALITY_LEVEL_2_PSEUDO_ENCODING)
                     .addEncoding(Encoding.COMPRESSION_LEVEL_0_PSEUDO_ENCODING)
-                    //.addEncoding(Encoding.CURSOR_PSEUDO_ENCODING)
-                    ;
+                    .addEncoding(Encoding.CURSOR_PSEUDO_ENCODING);
             connection.setPrefferedEncoding(preferedEncoding);
 
-
+            Log.d(TAG, "onCreate: Creating vnc interface for casting");
             castInterface = new CastInterface(this, new AndroidDisplay(getContext(), null));
             mouse = (AndroidMouse) castInterface.getMouseManager();
             keyboard = (AndroidKeyboard) castInterface.getKeyboardManager();
@@ -147,6 +155,7 @@ public class CastPresentationService extends CastRemoteDisplayLocalService {
             castInterface.androidWidth = p.x;
             castInterface.androidHeight = p.y;
 
+            Log.d(TAG, "onCreate: Creating thread " + mReady);
             if (mReady) {
                 mProtoThread = new Thread() {
                     @Override
@@ -155,19 +164,21 @@ public class CastPresentationService extends CastRemoteDisplayLocalService {
                             Looper.prepare();
                             Looper l = Looper.myLooper();
 
+                            Log.d(TAG, "Starting");
+
                             try {
                                 protocol = new VNCProtocol(connection, castInterface, logger);
                                 protocol.run();
                             } catch (VNCConnectionException e) {
                                 final String reason = e.toString();
-                                logger.printLn(reason);
+                                Log.d(TAG, reason);
                                 /*getContext().runOnUiThread(new Runnable() {
                                     public void run() {
                                         Toast.makeText(activity, reason, Toast.LENGTH_SHORT).show();
                                     }
                                 });*/
                             } catch (IOException e) {
-                                logger.printLn("Could not connect to ");
+                                Log.d(TAG, "Could not connect to " + connection.address + ":" + connection.port);
                                 /*activity.runOnUiThread(new Runnable() {
                                     public void run() {
                                         Toast.makeText(activity, "Could not connect to ", Toast.LENGTH_SHORT).show();
@@ -198,6 +209,7 @@ public class CastPresentationService extends CastRemoteDisplayLocalService {
             });*/
             }
         }
+
     }
 
 }

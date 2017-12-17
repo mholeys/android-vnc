@@ -1,5 +1,6 @@
 package uk.co.mholeys.android.vnc;
 
+import android.app.Activity;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -10,6 +11,7 @@ import uk.co.mholeys.vnc.display.input.IConnectionInformation;
 import uk.co.mholeys.vnc.display.input.IPasswordRequester;
 import uk.co.mholeys.vnc.log.Logger;
 
+import java.lang.ref.WeakReference;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
@@ -26,7 +28,7 @@ public class ServerData implements IConnectionInformation {
     public int port;
     public String password;
     public InetAddress inetAddress;
-    public int result = -1;
+    public volatile int result = -1;
 
     public ServerData() {}
 
@@ -40,27 +42,42 @@ public class ServerData implements IConnectionInformation {
     }
 
     public void prepare() {
-        AsyncTask<String, InetAddress, Integer> getAddressTask = new AsyncTask<String, InetAddress, Integer>() {
-            protected void onPreExecute() { }
-
-            protected Integer doInBackground(String... aParams) {
-                if (aParams != null && aParams.length > 0) {
-                    String address = aParams[0];
-                    try {
-                        inetAddress = InetAddress.getByName(address);
-                        return 1;
-                    } catch (UnknownHostException e) {
-                        return 0;
-                    }
-                }
-                return 0;
-            }
-
-            protected void onPostExecute(Integer r) {
-                result = r;
-            }
-        }.execute(address);
+        Log.d("ServerData", "preparing ");
+        new ServerData.AddressFindTask(this).execute(address);
     }
+
+    static class AddressFindTask extends AsyncTask<String, InetAddress, Integer>  {
+        private WeakReference<ServerData> serverDataWeakReference;
+
+        AddressFindTask(ServerData sd) {
+            serverDataWeakReference = new WeakReference<>(sd);
+        }
+
+        @Override
+        protected void onPreExecute() { }
+
+        @Override
+        protected Integer doInBackground(String... aParams) {
+            Log.d("AsyncAddress", "doInBackground: running");
+            if (aParams != null && aParams.length > 0) {
+                String address = aParams[0];
+                try {
+                    Log.d("AsyncAddress", "doInBackground: getting");
+                    serverDataWeakReference.get().inetAddress = InetAddress.getByName(address);
+                    return 1;
+                } catch (UnknownHostException e) {
+                    return 0;
+                }
+            }
+            return 0;
+        }
+
+        @Override
+        protected void onPostExecute(Integer r) {
+            Log.d("Async", "onPostExecute: Set result to " + r);
+            serverDataWeakReference.get().result = r;
+        }
+    };
 
     @Override
     public int getPort() {

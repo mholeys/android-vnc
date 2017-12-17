@@ -325,7 +325,7 @@ public class ServerListActivity extends AppCompatActivity {
                     public void onServiceCreated(
                             CastRemoteDisplayLocalService service) {
                         CastPresentationService pService = (CastPresentationService) service;
-
+                        Log.d(TAG, "CAST onServiceCreated: Starting service");
                         pService.connection = server;
                         pService.connection.prepare();
 
@@ -335,6 +335,7 @@ public class ServerListActivity extends AppCompatActivity {
                     @Override
                     public void onRemoteDisplaySessionStarted(
                             CastRemoteDisplayLocalService service) {
+                        Log.d(TAG, "CAST onRemoteDisplaySessionStarted: Started service");
                         // Initialize sender UI
                         CastPresentationService pService = (CastPresentationService) service;
                         mCasting = true;
@@ -343,6 +344,7 @@ public class ServerListActivity extends AppCompatActivity {
                     @Override
                     public void onRemoteDisplaySessionError(
                             Status errorReason){
+                        Log.d(TAG, "CAST onRemoteDisplaySessionError: ERROR in service");
                         initError(errorReason);
                     }
                 });
@@ -416,7 +418,23 @@ public class ServerListActivity extends AppCompatActivity {
 
     protected void onResume() {
         super.onResume();
+        Log.d(TAG, "onResume: Called");
 
+        if (mSelectedCastDevice != null) {
+            if (mCastMediaRouter != null) {
+                if (mCastMediaRouter.getSelectedRoute() != null) {
+                    // See if this was selected using the cast selection button
+                    if (!mCastMediaRouter.getSelectedRoute().equals(mSelectedCastDevice)) {
+                        // Assume that this was picked using the popup so we need to ignore it
+                        Log.d(TAG, "onResume: Selected device does not match cast selected");
+                        mSelectedCastDevice = null;
+
+                    }
+                }
+            }
+        }
+        // Always reset the display selection
+        mSelectedDisplay = null;
 
         // Setup server list
         serverList = (ListView) findViewById(R.id.serverListView);

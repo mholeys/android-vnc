@@ -72,31 +72,6 @@ public class VncActivity extends AppCompatActivity {
         connection.port = intent.getIntExtra(ServerListActivity.SERVER_INFO_PORT, 0);
         connection.password = intent.getStringExtra(ServerListActivity.SERVER_INFO_PASSWORD);
 
-        connection.prepare();
-        while (connection.result != -1) {
-            try {
-                Thread.sleep(50);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-        try {
-            Thread.sleep(100);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        if (connection.getAddress() == null) {
-            //Logger.logger.printLn("Failed to connect to host");
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    Toast.makeText(activity, "Failed to connect to host", Toast.LENGTH_LONG);
-                }
-            });
-            mReady = false;
-        }
-
         final ServerData connection = this.connection;
         EncodingSettings preferedEncoding = new EncodingSettings()
                 .addEncoding(Encoding.TIGHT_ENCODING)
@@ -129,6 +104,33 @@ public class VncActivity extends AppCompatActivity {
                     if (Looper.myLooper() == null) {
                         Looper.prepare();
                         Looper l = Looper.myLooper();
+
+                        // Get connection info ready
+                        if (connection.result == -1) {
+                            Log.d("VNCActivity", "protoThread: waiting for connection lookup");
+                            connection.prepare();
+                            while (connection.result == -1) {
+                                try {
+                                    Thread.sleep(50);
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        } else {
+                            Log.d("VNCActivity", "protoThread: Connection is pre-prepared");
+                        }
+
+                        if (connection.getAddress() == null) {
+                            //Logger.logger.printLn("Failed to connect to host");
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Toast.makeText(activity, "Failed to connect to host", Toast.LENGTH_LONG);
+                                }
+                            });
+                            mReady = false;
+                        }
+
 
                         try {
                             protocol = new VNCProtocol(connection, androidInterface, logger);

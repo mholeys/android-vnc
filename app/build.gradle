@@ -33,7 +33,7 @@ android {
 
 dependencies {
     //compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile urlFile("http://mholeys.co.uk/ci/artifacts/vnc/50/vnc.jar", 'vnc')
+    compile urlFile("http://mholeys.co.uk/ci/artifacts/vnc/54/vnc.jar", 'vnc')
     //compile files('libs/vnc-35.jar')
 
 
