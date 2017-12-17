@@ -89,12 +89,12 @@ public class VNCPresentation extends Presentation {
         EncodingSettings preferedEncoding = new EncodingSettings()
                 .addEncoding(Encoding.TIGHT_ENCODING)
                 .addEncoding(Encoding.ZLIB_ENCODING)
-                .addEncoding(Encoding.CORRE_ENCODING)
-                .addEncoding(Encoding.RRE_ENCODING)
+                //.addEncoding(Encoding.CORRE_ENCODING)
+                //.addEncoding(Encoding.RRE_ENCODING)
                 .addEncoding(Encoding.RAW_ENCODING)
                 .addEncoding(Encoding.JPEG_QUALITY_LEVEL_2_PSEUDO_ENCODING)
                 .addEncoding(Encoding.COMPRESSION_LEVEL_0_PSEUDO_ENCODING)
-                //.addEncoding(Encoding.CURSOR_PSEUDO_ENCODING)
+                .addEncoding(Encoding.CURSOR_PSEUDO_ENCODING)
                 ;
         connection.setPrefferedEncoding(preferedEncoding);
 
@@ -172,7 +172,9 @@ public class VNCPresentation extends Presentation {
         super.onStop();
         try {
             protocol.disconnect();
-        } catch (Exception e) { }
+        } catch (Exception e) {
+            Log.e(TAG, "onStop: Failed to disconnect nicely");
+        }
     }
 
 }
