@@ -93,6 +93,11 @@ public class AndroidDisplay extends AppCompatImageView implements IDisplay {
         scaleMatrix.setScale(scale, scale);
         canvas.setMatrix(canvasMatrix);
         canvas.drawBitmap(screen.bitmap, scaleMatrix, new Paint());
+        Matrix mouseMatrix = new Matrix();
+        if (screen.mouseBitmap != null) {
+            mouseMatrix.setTranslate(screen.mouseX - screen.mouseCenterX, screen.mouseY - screen.mouseCenterY);
+            canvas.drawBitmap(screen.mouseBitmap, mouseMatrix, new Paint());
+        }
         //canvas.drawRect(mouse.remoteX, mouse.remoteY, 5, 5, new Paint(Color.GREEN));
 
 

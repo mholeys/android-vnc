@@ -243,6 +243,22 @@ public class BuiltInDisplayTouchHandler implements ITouchHandler {
     public boolean onMouseGenericEvent(MotionEvent event) {
         Log.d("Mouse", "Scroll " + event.getSource());
         if (event.getSource() == InputDevice.SOURCE_MOUSE) {
+            if (event.isButtonPressed(MotionEvent.BUTTON_PRIMARY)) {
+                pointerPoint.left = true;
+            } else {
+                pointerPoint.left = false;
+            }
+
+            if (event.isButtonPressed(MotionEvent.BUTTON_SECONDARY)) {
+                pointerPoint.right = true;
+            } else {
+                pointerPoint.right = false;
+            }
+            if (event.isButtonPressed(MotionEvent.BUTTON_TERTIARY)) {
+                pointerPoint.middle = true;
+            } else {
+                pointerPoint.middle = false;
+            }
             if (event.getAxisValue(MotionEvent.AXIS_VSCROLL) > 0) {
                 pointerPoint.mwUp = true;
                 pointerPoint.mwDown = false;
@@ -281,6 +297,11 @@ public class BuiltInDisplayTouchHandler implements ITouchHandler {
     @Override
     public PointerPoint getCurrentMousePoint() {
         return miceUpdates.poll();
+    }
+
+    public void updateLocalMouse() {
+        PointerPoint p = miceUpdates.peek();
+        inf.getScreen().moveCursor(p.x, p.y);
     }
 
     @Override

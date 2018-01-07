@@ -41,6 +41,7 @@ public interface ITouchHandler {
 
     public boolean sendMouse();
     public PointerPoint getCurrentMousePoint();
+    public void updateLocalMouse();
 
-    void setScale(double mouseScaleW, double mouseScaleH);
+    public void setScale(double mouseScaleW, double mouseScaleH);
 }

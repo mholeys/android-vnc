@@ -73,17 +73,18 @@ public class VncActivity extends AppCompatActivity {
         connection.password = intent.getStringExtra(ServerListActivity.SERVER_INFO_PASSWORD);
 
         final ServerData connection = this.connection;
-        EncodingSettings preferedEncoding = new EncodingSettings()
+        EncodingSettings preferredEncoding = new EncodingSettings()
                 .addEncoding(Encoding.TIGHT_ENCODING)
                 .addEncoding(Encoding.ZLIB_ENCODING)
-                .addEncoding(Encoding.CORRE_ENCODING)
-                .addEncoding(Encoding.RRE_ENCODING)
+                //.addEncoding(Encoding.CORRE_ENCODING)
+                //.addEncoding(Encoding.RRE_ENCODING)
                 .addEncoding(Encoding.RAW_ENCODING)
                 .addEncoding(Encoding.JPEG_QUALITY_LEVEL_2_PSEUDO_ENCODING)
                 .addEncoding(Encoding.COMPRESSION_LEVEL_0_PSEUDO_ENCODING)
-                //.addEncoding(Encoding.CURSOR_PSEUDO_ENCODING)
+                .addEncoding(Encoding.X_CURSOR_PSEUDO_ENCODING)
+                .addEncoding(Encoding.CURSOR_PSEUDO_ENCODING)
         ;
-        connection.setPrefferedEncoding(preferedEncoding);
+        connection.setPrefferedEncoding(preferredEncoding);
 
 
         androidInterface = new AndroidInterface(this, new AndroidDisplay(activity, null));

@@ -41,6 +41,7 @@ public class AndroidMouse2 implements IMouseManager, View.OnTouchListener, View.
 
     @Override
     public PointerPoint getLocalMouse() {
+        touchHandler.updateLocalMouse();
         if (touchHandler.sendMouse()) {
             return touchHandler.getCurrentMousePoint();
         }
@@ -57,7 +58,6 @@ public class AndroidMouse2 implements IMouseManager, View.OnTouchListener, View.
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {
-
         touchHandler.createScaleGestureDetector(inf);
 
         int action = MotionEventCompat.getActionMasked(event);

@@ -1,7 +1,9 @@
 package uk.co.mholeys.android.vnc.display;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.Point;
+import android.util.Log;
 
 import uk.co.mholeys.android.vnc.input.AndroidKeyboard;
 import uk.co.mholeys.android.vnc.input.AndroidMouse;
@@ -79,7 +81,20 @@ public class AndroidInterface implements IUserInterface {
         display.screen = screen;
         display.mouse = mouse;
 
-        mouse.setScale((double)width / (double) androidWidth, (double)height / (double) androidHeight);
+        int orientation = context.getResources().getConfiguration().orientation;
+        double wS = 1, hS = 1;
+        if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            // height < width
+            wS = width/androidWidth;
+            hS = height/androidHeight;
+        } else if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+            // width < height
+            wS = height/androidWidth;
+            hS = width/androidHeight;
+        }
+
+        Log.d("Interface", "setSize: " + androidWidth + " " + androidHeight);
+        mouse.setScale(wS, hS);
     }
 
 

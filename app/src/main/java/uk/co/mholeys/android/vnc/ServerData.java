@@ -20,7 +20,7 @@ import java.net.UnknownHostException;
  */
 public class ServerData implements IConnectionInformation {
 
-    private PixelFormat format = PixelFormat.DEFAULT_FORMAT;
+    private PixelFormat format = null;
     private EncodingSettings encodingSettings = EncodingSettings.DEFAULT_ENCODINGS;
 
     public String name;

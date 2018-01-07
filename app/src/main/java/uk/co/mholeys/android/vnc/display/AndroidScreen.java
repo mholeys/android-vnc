@@ -33,6 +33,7 @@ public class AndroidScreen implements IScreen {
 
     AndroidDisplay display;
     public static Bitmap bitmap;
+    public static Bitmap mouseBitmap;
     public UpdateManager updateManager;
     private int width;
     private int height;
@@ -41,6 +42,8 @@ public class AndroidScreen implements IScreen {
     public double cutHeight = 0;
     public float cutX = 0;
     public float cutY = 0;
+
+    public int mouseX, mouseY, mouseCenterX, mouseCenterY, mouseW, mouseH;
 
     public AndroidScreen(int width, int height) {
         setSize(width, height);
@@ -155,11 +158,29 @@ public class AndroidScreen implements IScreen {
     }
 
     @Override
-    public void drawCursor(int x, int y, int w, int h, byte[] bytes) {
-        Canvas canvas = new Canvas(bitmap);
-        Paint cursor = new Paint();
-        cursor.setColor(0xFF00FF);
-        canvas.drawRect(x, y, 10, 10, cursor);
+    public void setupCursor(int x, int y, int w, int h, int[] pixels) {
+        mouseCenterX = x;
+        mouseCenterY = y;
+        mouseW = w;
+        mouseH = h;
+        mouseBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+        if (mouseBitmap != null) {
+            for (int yA = 0; yA < h; yA++) {
+                for (int xA = 0; xA < w; xA++) {
+                    if (((pixels[xA+yA*w] & 0xFF000000)) == 0x99000000) {
+                        // Skip colour so make transparent
+                        mouseBitmap.setPixel(xA, yA, 0);
+                    } else {
+                        mouseBitmap.setPixel(xA, yA, 0xFF000000 | pixels[xA+yA*w]);
+                    }
+                }
+            }
+        }
+    }
+
+    public void moveCursor(int x, int y) {
+        mouseX = x;
+        mouseY = y;
     }
 
     public void process() {
