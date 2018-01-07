@@ -21,6 +21,7 @@ import uk.co.mholeys.vnc.display.UpdateManager;
  */
 public class AndroidInterface implements IUserInterface {
 
+    private static final String TAG = "AndInterface";
     public AndroidDisplay display;
     AndroidScreen screen;
     private UpdateManager updateManager;
@@ -83,20 +84,23 @@ public class AndroidInterface implements IUserInterface {
 
         int orientation = context.getResources().getConfiguration().orientation;
         double wS = 1, hS = 1;
-        if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            // height < width
-            wS = width/androidWidth;
-            hS = height/androidHeight;
-        } else if (orientation == Configuration.ORIENTATION_PORTRAIT) {
-            // width < height
-            wS = height/androidWidth;
-            hS = width/androidHeight;
+        if (androidWidth == 0 || androidHeight == 0) {
+            Log.d(TAG, "setSize: Zero! W:" + androidWidth + " H:" + androidHeight);
+        } else {
+            if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                // height < width
+                wS = width / androidWidth;
+                hS = height / androidHeight;
+            } else if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+                // width < height
+                wS = height / androidWidth;
+                hS = width / androidHeight;
+            }
         }
 
-        Log.d("Interface", "setSize: " + androidWidth + " " + androidHeight);
+        Log.d(TAG, "setSize: " + androidWidth + " " + androidHeight);
         mouse.setScale(wS, hS);
     }
-
 
     @Override
     public void setServerFormat(PixelFormat format) {
