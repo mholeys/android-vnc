@@ -1,5 +1,4 @@
 apply plugin: 'com.android.application'
-apply plugin: 'spoon'
 
 def urlFile = { url, name ->
     File file = new File("$buildDir/libs/${name}.jar")
@@ -32,12 +31,6 @@ android {
     }
 }
 
-spoon {
-    debug = false
-    // To grant permissions to Android M >= devices */
-    grantAllPermissions = true
-}
-
 dependencies {
     //compile fileTree(include: ['*.jar'], dir: 'libs')
     implementation urlFile("http://mholeys.co.uk/ci/artifacts/vnc/59/vnc.jar", 'vnc')
@@ -52,11 +45,5 @@ dependencies {
     implementation 'com.google.android.gms:play-services-cast-framework:10.0.1'
 
 
-    androidTestCompile 'com.android.support.test.espresso:espresso-core:2.2.2' // Key as 2.2.2 for old play services#'
     testImplementation 'junit:junit:4.12'
-
-    //Cucumber better reports
-    testImplementation 'net.masterthought:cucumber-reporting:3.13.0'
-    // Spoon screenshot + multi-device tests
-    androidTestCompile 'com.squareup.spoon:spoon-client:1.6.4'
 }
