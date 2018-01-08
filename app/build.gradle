@@ -22,11 +22,19 @@ android {
         targetSdkVersion 24
         versionCode 1
         versionName "1.0"
+
+        testApplicationId "uk.co.mholeys.android.vnc.test"
+        //testInstrumentationRunner "uk.co.mholeys.android.vnc.test.Instrumentation"
     }
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+    sourceSets {
+        androidTest {
+            assets.srcDirs = ['src/androidTest/assets']
         }
     }
 }
@@ -44,6 +52,10 @@ dependencies {
     implementation 'com.android.support:mediarouter-v7:24.2.1'
     implementation 'com.google.android.gms:play-services-cast-framework:10.0.1'
 
+    androidTestCompile 'com.android.support.test.espresso:espresso-core:2.2.2'
+    androidTestCompile 'com.android.support:support-annotations:24.2.1'  // <-- match with the support lib version
+    androidTestCompile 'info.cukes:cucumber-android:1.2.5@jar'
+    androidTestCompile 'info.cukes:cucumber-picocontainer:1.2.4'
 
     testImplementation 'junit:junit:4.12'
 }

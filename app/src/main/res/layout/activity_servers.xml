@@ -21,7 +21,14 @@
 
     </android.support.design.widget.AppBarLayout>
 
-    <include layout="@layout/content_server_list" />
+    <ListView
+        android:id="@+id/server_list_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentTop="true"
+        android:choiceMode="singleChoice"
+        android:fastScrollEnabled="false" />
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab"
