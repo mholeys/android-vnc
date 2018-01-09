@@ -427,7 +427,7 @@ public class ServerListActivity extends AppCompatActivity {
         mSelectedDisplay = null;
 
         // Setup server list
-        serverList = (ListView) findViewById(R.id.serverListView);
+        serverList = (ListView) findViewById(R.id.server_list_view);
         listItems = new ArrayAdapter<ServerEntry>(this, R.layout.list_layout);
 
         serverList.setOnCreateContextMenuListener(this);

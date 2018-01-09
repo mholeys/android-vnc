@@ -32,10 +32,48 @@ public class ServerListActivitySteps extends ActivityInstrumentationTestCase2<Se
     }
 
     @When("^I press (\\S+)$")
-    public void I_press_d(String button) {
+    public void I_press_x(String item) {
         ServerListActivity activity = getActivity();
+        switch (item) {
+            case "Add":
+                onView(withId(R.id.add_server_action_bar_button));
+                break;
+        }
         // onView
         // with...
+    }
+
+    @When("^I press (\\S+) in the (.*)$")
+    public void I_press_x_in_y(String item, String container) {
+        ServerListActivity activity = getActivity();
+
+        switch (container.toLowerCase()) {
+            case "action bar":
+                switch (item) {
+                    case "add":
+                        onView(withId(R.id.add_server_action_bar_button));
+                        break;
+                }
+                break;
+            case "server list":
+                switch (item) {
+                }
+                break;
+            default:
+                onView(withText(item));
+                break;
+        }
+
+    }
+
+    @When("^I long press (\\S+)$")
+    public void I_long_press_x(String item) {
+        ServerListActivity activity = getActivity();
+    }
+
+    @When("^I long press (\\S+) in the (.*)$")
+    public void I_long_press_x_in_y(String item, String container) {
+        ServerListActivity activity = getActivity();
     }
 
     @Then("^I should see (\\S+)$")

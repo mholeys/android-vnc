@@ -2,10 +2,10 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@id/addServerActionBarButton"
+        android:id="@+id/add_server_action_bar_button"
         android:icon="@android:drawable/ic_input_add"
-        android:title="Add server"
         android:orderInCategory="0"
+        android:title="Add server"
         app:showAsAction="always" />
     <item
         android:id="@+id/media_route_menu_item"
