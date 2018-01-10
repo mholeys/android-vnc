@@ -17,6 +17,7 @@ import cucumber.api.java.After;
 import cucumber.api.java.Before;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
+import cucumber.api.java.en.When;
 import uk.co.mholeys.android.vnc.AddServerActivity;
 import uk.co.mholeys.android.vnc.ServerListActivity;
 
@@ -29,7 +30,7 @@ import static junit.framework.Assert.assertTrue;
  * Created by Matthew on 10/01/2018.
  */
 
-//@CucumberOptions(features = "feaatures")
+@CucumberOptions(features = "features")
 public class AddServerActivitySteps {
 
     @Rule
@@ -61,6 +62,11 @@ public class AddServerActivitySteps {
         });
 
         return currentActivity[0];
+    }
+
+    @When("^I fill in (\\S+) with (.*)$")
+    public void I_fill_in_x_with_y(String field, String value) {
+
     }
 
     @Then("^I should see the AddServerActivity$")
