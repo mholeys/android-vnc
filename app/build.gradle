@@ -24,9 +24,12 @@ android {
         versionName "1.0"
 
         testApplicationId "uk.co.mholeys.android.vnc.test"
-        //testInstrumentationRunner "uk.co.mholeys.android.vnc.test.Instrumentation"
+        testInstrumentationRunner "uk.co.mholeys.android.vnc.test.Instrumentation"
     }
     buildTypes {
+        debug {
+            testCoverageEnabled true
+        }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
@@ -43,7 +46,6 @@ dependencies {
     //compile fileTree(include: ['*.jar'], dir: 'libs')
     implementation urlFile("http://mholeys.co.uk/ci/artifacts/vnc/59/vnc.jar", 'vnc')
     //compile files('libs/vnc-35.jar')
-
     //Chromecast deps
     implementation 'com.android.support:appcompat-v7:24.2.1'
     implementation 'com.android.support:design:24.2.1'
