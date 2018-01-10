@@ -44,7 +44,7 @@ android {
 
 dependencies {
     //compile fileTree(include: ['*.jar'], dir: 'libs')
-    implementation urlFile("http://mholeys.co.uk/ci/artifacts/vnc/59/vnc.jar", 'vnc')
+    implementation urlFile("http://mholeys.co.uk/ci/artifacts/vnc/59/vnc.jar", 'vnc-59')
     //compile files('libs/vnc-35.jar')
     //Chromecast deps
     implementation 'com.android.support:appcompat-v7:24.2.1'
