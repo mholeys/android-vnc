@@ -2,11 +2,18 @@ package uk.co.mholeys.android.vnc.test;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.support.annotation.Nullable;
+import android.support.test.espresso.ViewAction;
+import android.support.test.espresso.core.deps.guava.collect.Iterables;
 import android.support.test.rule.ActivityTestRule;
+import android.support.test.runner.lifecycle.ActivityLifecycleMonitorRegistry;
+import android.support.test.runner.lifecycle.Stage;
 import android.util.Log;
 import android.widget.ListView;
 
 import org.junit.Rule;
+
+import java.util.Collection;
 
 import cucumber.api.CucumberOptions;
 import cucumber.api.java.After;
@@ -17,8 +24,11 @@ import cucumber.api.java.en.When;
 import uk.co.mholeys.android.vnc.*;
 import uk.co.mholeys.android.vnc.R;
 
+import static android.support.test.InstrumentationRegistry.getInstrumentation;
 import static android.support.test.espresso.Espresso.*;
+import static android.support.test.espresso.action.ViewActions.click;
 import static android.support.test.espresso.matcher.ViewMatchers.*;
+import static android.support.test.runner.lifecycle.Stage.RESUMED;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
 
@@ -30,15 +40,13 @@ import static junit.framework.Assert.assertTrue;
 public class ServerListActivitySteps {
 
     @Rule
-    public ActivityTestRule<ServerListActivity> activityTestRule = new ActivityTestRule<>(ServerListActivity.class, true, true);
+    public ActivityTestRule<ServerListActivity> activityTestRule = new ActivityTestRule<>(ServerListActivity.class, true, false);
 
     Intent intent = new Intent();
-    Activity activity;
 
     @Before
     public void setup() {
-        Log.d("VNCTest", "setup: ");
-        activity = activityTestRule.getActivity();
+        activityTestRule.launchActivity(null);
     }
 
     @After
@@ -46,8 +54,24 @@ public class ServerListActivitySteps {
         Log.d("VNCTest", "tearDown: ");
     }
 
+    @Nullable
+    private Activity getActivity() {
+        final Activity[] currentActivity = new Activity[1];
+        getInstrumentation().runOnMainSync(new Runnable() {
+            public void run() {
+                Collection resumedActivities = ActivityLifecycleMonitorRegistry.getInstance().getActivitiesInStage(RESUMED);
+                if (resumedActivities.iterator().hasNext()){
+                    currentActivity[0] = (Activity) resumedActivities.iterator().next();
+                }
+            }
+        });
+
+        return currentActivity[0];
+    }
+
     @Given("^I am on the ServerListActivity$")
     public void I_have_a_ServerListActivity() {
+        Activity activity = getActivity();
         assertNotNull(activity);
         assertTrue(activity instanceof ServerListActivity);
     }
@@ -56,7 +80,7 @@ public class ServerListActivitySteps {
     public void I_press_x(String item) {
         switch (item) {
             case "Add":
-                onView(withId(R.id.add_server_action_bar_button));
+                onView(withId(R.id.add_server_action_bar_button)).perform(click());
                 break;
         }
         // onView
@@ -69,7 +93,7 @@ public class ServerListActivitySteps {
             case "action bar":
                 switch (item) {
                     case "add":
-                        onView(withId(R.id.add_server_action_bar_button));
+                        onView(withId(R.id.add_server_action_bar_button)).perform(click());
                         break;
                 }
                 break;
@@ -96,6 +120,7 @@ public class ServerListActivitySteps {
 
     @Then("^I should see (\\S+)$")
     public void I_should_see_server(String server) {
+        Activity activity = getActivity();
         ListView servers = (ListView) activity.findViewById(R.id.server_list_view);
         //onView(withId(R.id.server_list_view)).check(ViewAssertions.matches(withText(server));
 

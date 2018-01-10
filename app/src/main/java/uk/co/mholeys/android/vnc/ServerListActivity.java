@@ -159,7 +159,7 @@ public class ServerListActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
 
-        if (id == R.id.addServerActionBarButton) {
+        if (id == R.id.add_server_action_bar_button) {
             Log.d(TAG, "ACTION: add action");
             addServerIntent();
             return true;
