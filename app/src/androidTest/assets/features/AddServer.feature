@@ -6,15 +6,14 @@ Feature: AddServer
     When I press add in the action bar
     Then I should see the AddServerActivity
 
-    // TODO:
   Scenario Outline: Add server
     Given I am on the AddServerActivity
     When I fill in name with <name>
     And I fill in address with <address>
-    And I fill in password with <password>
     And I fill in port with <port>
-    And I press add
-    Then I
+    And I fill in password with <password>
+    And I press Add
+    Then I should see the ServerListActivity
 
     Examples:
       | name      | address         | password    | port |

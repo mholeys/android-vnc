@@ -26,9 +26,9 @@ public class EditServerActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_server);
         Intent intent = getIntent();
-        mName = (EditText) findViewById(R.id.server_name_Text);
+        mName = (EditText) findViewById(R.id.server_name_text);
         mName.setText(intent.getStringExtra(ServerListActivity.SERVER_INFO_NAME));
-        mAddress = (EditText) findViewById(R.id.address_text);
+        mAddress = (EditText) findViewById(R.id.server_address_text);
         mAddress.setText(intent.getStringExtra(ServerListActivity.SERVER_INFO_ADDRESS));
         mPort = (EditText) findViewById(R.id.portText);
         mPort.setText(""+intent.getIntExtra(ServerListActivity.SERVER_INFO_PORT, 5901));

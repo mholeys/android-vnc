@@ -15,4 +15,12 @@
     <string name="media_route_menu_title">Cast</string>
     <string name="title_activity_input">InputActivity</string>
     <string name="display_list_select_title">Display</string>
+    <string name="vnc_default_port">5901</string>
+    <string name="add_activity_label_add">Add</string>
+    <string name="add_activity_label_cancel">Cancel</string>
+
+    <string name="add_activity_label_name">Name</string>
+    <string name="add_activity_label_address">Address</string>
+    <string name="add_activity_label_password">Password</string>
+    <string name="add_activity_label_port">Port</string>
 </resources>

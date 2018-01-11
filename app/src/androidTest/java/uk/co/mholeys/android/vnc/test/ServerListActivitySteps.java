@@ -46,12 +46,12 @@ public class ServerListActivitySteps {
 
     @Before
     public void setup() {
-        activityTestRule.launchActivity(null);
+        Log.d("ServerListTest", "setup: ");
     }
 
     @After
     public void tearDown() {
-        Log.d("VNCTest", "tearDown: ");
+        Log.d("ServerListTest", "tearDown: ");
     }
 
     @Nullable
@@ -70,21 +70,17 @@ public class ServerListActivitySteps {
     }
 
     @Given("^I am on the ServerListActivity$")
+    public void given_server_list_activity() {
+        if (activityTestRule.getActivity() == null) {
+            activityTestRule.launchActivity(null);
+        }
+    }
+
+    @Then("^I should see the ServerListActivity$")
     public void I_have_a_ServerListActivity() {
         Activity activity = getActivity();
         assertNotNull(activity);
         assertTrue(activity instanceof ServerListActivity);
-    }
-
-    @When("^I press (\\S+)$")
-    public void I_press_x(String item) {
-        switch (item) {
-            case "Add":
-                onView(withId(R.id.add_server_action_bar_button)).perform(click());
-                break;
-        }
-        // onView
-        // with...
     }
 
     @When("^I press (\\S+) in the (.*)$")
@@ -108,21 +104,16 @@ public class ServerListActivitySteps {
 
     }
 
-    @When("^I long press (\\S+)$")
-    public void I_long_press_x(String item) {
-
-    }
-
     @When("^I long press (\\S+) in the (.*)$")
     public void I_long_press_x_in_y(String item, String container) {
 
     }
 
-    @Then("^I should see (\\S+)$")
+    /*@Then("^I should see (\\S+)$")
     public void I_should_see_server(String server) {
         Activity activity = getActivity();
         ListView servers = (ListView) activity.findViewById(R.id.server_list_view);
         //onView(withId(R.id.server_list_view)).check(ViewAssertions.matches(withText(server));
 
-    }
+    }*/
 }

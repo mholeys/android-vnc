@@ -21,9 +21,9 @@ public class AddServerActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_server);
-        mName = (EditText) findViewById(R.id.server_name_Text);
-        mAddress = (EditText) findViewById(R.id.address_text);
-        mPort = (EditText) findViewById(R.id.portText);
+        mName = (EditText) findViewById(R.id.server_name_text);
+        mAddress = (EditText) findViewById(R.id.server_address_text);
+        mPort = (EditText) findViewById(R.id.server_port_text);
         mPassword = (EditText) findViewById(R.id.server_password_text);
     }
 
