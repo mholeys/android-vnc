@@ -18,19 +18,20 @@ public class EditServerActivity extends AppCompatActivity {
     EditText mPort;
     EditText mPassword;
 
-
     int id = -1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_server);
+        setTitle(R.string.title_activity_edit_server);
+
         Intent intent = getIntent();
         mName = (EditText) findViewById(R.id.server_name_text);
         mName.setText(intent.getStringExtra(ServerListActivity.SERVER_INFO_NAME));
         mAddress = (EditText) findViewById(R.id.server_address_text);
         mAddress.setText(intent.getStringExtra(ServerListActivity.SERVER_INFO_ADDRESS));
-        mPort = (EditText) findViewById(R.id.portText);
+        mPort = (EditText) findViewById(R.id.server_port_text);
         mPort.setText(""+intent.getIntExtra(ServerListActivity.SERVER_INFO_PORT, 5901));
         mPassword = (EditText) findViewById(R.id.server_password_text);
         mPassword.setText(intent.getStringExtra(ServerListActivity.SERVER_INFO_PASSWORD));

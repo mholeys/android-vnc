@@ -14,6 +14,7 @@ Feature: AddServer
     And I fill in password with <password>
     And I press Add
     Then I should see the ServerListActivity
+    Then ServerList should contain a server with "<name>" "<address>" "<port>"
 
     Examples:
       | name      | address         | password    | port |

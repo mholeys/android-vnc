@@ -8,117 +8,123 @@
 
     <EditText
         android:id="@+id/server_name_text"
-        android:layout_width="368dp"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
         android:ems="10"
         android:inputType="textPersonName"
-        android:layout_marginLeft="8dp"
-        app:layout_constraintLeft_toLeftOf="parent"
-        android:layout_marginStart="8dp"
-        app:layout_constraintTop_toBottomOf="@+id/name_label" />
+        app:layout_constraintBottom_toTopOf="@+id/address_label"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <EditText
         android:id="@+id/server_address_text"
-        android:layout_width="368dp"
-        android:layout_height="wrap_content"
+        android:layout_width="0dp"
+        android:layout_height="45dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
         android:ems="10"
         android:inputType="textUri"
-        android:layout_marginLeft="8dp"
-        app:layout_constraintLeft_toLeftOf="parent"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        app:layout_constraintTop_toBottomOf="@+id/address_label" />
+        app:layout_constraintBottom_toTopOf="@+id/port_label"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <EditText
         android:id="@+id/server_password_text"
-        android:layout_width="368dp"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="144dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
         android:ems="10"
         android:inputType="textPassword"
-        android:layout_marginLeft="8dp"
-        app:layout_constraintLeft_toLeftOf="parent"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        app:layout_constraintTop_toBottomOf="@+id/textView" />
+        app:layout_constraintBottom_toTopOf="@+id/edit_button"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
-        android:id="@+id/textView"
+        android:id="@+id/password_label"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Password"
-        android:layout_marginTop="7dp"
-        app:layout_constraintTop_toBottomOf="@+id/server_address_text"
-        android:layout_marginLeft="8dp"
-        app:layout_constraintLeft_toLeftOf="parent"
-        android:layout_marginStart="8dp" />
+        android:layout_height="19dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginStart="8dp"
+        android:labelFor="@+id/server_password_text"
+        android:text="@string/edit_activity_label_password"
+        app:layout_constraintBottom_toTopOf="@+id/server_password_text"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
         android:id="@+id/port_label"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Port"
-        android:layout_marginTop="7dp"
-        app:layout_constraintTop_toBottomOf="@+id/server_password_text"
-        android:layout_marginLeft="8dp"
-        app:layout_constraintLeft_toLeftOf="parent"
-        android:layout_marginStart="8dp" />
+        android:layout_height="19dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginStart="8dp"
+        android:labelFor="@+id/server_port_text"
+        android:text="@string/edit_activity_label_port"
+        app:layout_constraintBottom_toTopOf="@+id/server_port_text"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
         android:id="@+id/address_label"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Address"
-        android:layout_marginTop="7dp"
-        app:layout_constraintTop_toBottomOf="@+id/server_name_text"
-        android:layout_marginLeft="8dp"
-        app:layout_constraintLeft_toLeftOf="parent"
-        android:layout_marginStart="8dp" />
+        android:layout_height="19dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginStart="8dp"
+        android:labelFor="@+id/server_address_text"
+        android:text="@string/edit_activity_label_address"
+        app:layout_constraintBottom_toTopOf="@+id/server_address_text"
+        app:layout_constraintLeft_toLeftOf="parent" />
 
     <TextView
         android:id="@+id/name_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="8dp"
+        android:layout_marginBottom="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
-        android:text="Name"
-        app:layout_constraintLeft_toLeftOf="parent"
+        android:labelFor="@+id/server_name_text"
+        android:text="@string/edit_activity_label_name"
+        app:layout_constraintBottom_toTopOf="@+id/server_name_text"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <EditText
-        android:id="@+id/portText"
-        android:layout_width="368dp"
+        android:id="@+id/server_port_text"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
         android:ems="10"
         android:inputType="number"
-        android:text="5901"
-        android:layout_marginLeft="8dp"
-        app:layout_constraintLeft_toLeftOf="parent"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        app:layout_constraintTop_toBottomOf="@+id/port_label" />
+        android:text="@string/vnc_default_port"
+        app:layout_constraintBottom_toTopOf="@+id/password_label"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <Button
-        android:id="@+id/editButton"
+        android:id="@+id/edit_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
         android:onClick="editServer"
-        android:text="Edit"
-        android:layout_marginRight="8dp"
-        app:layout_constraintRight_toRightOf="parent"
+        android:text="@string/edit_activity_label_edit"
         app:layout_constraintBottom_toBottomOf="parent"
-        android:layout_marginBottom="8dp"
-        android:layout_marginEnd="8dp" />
+        app:layout_constraintRight_toRightOf="parent" />
 
     <Button
-        android:id="@+id/cancelButton"
+        android:id="@+id/cancel_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:onClick="cancelEdit"
-        android:text="Cancel"
-        app:layout_constraintBottom_toBottomOf="parent"
         android:layout_marginBottom="8dp"
-        android:layout_marginLeft="8dp"
-        app:layout_constraintLeft_toLeftOf="parent"
-        android:layout_marginStart="8dp" />
+        android:layout_marginStart="8dp"
+        android:onClick="cancelEdit"
+        android:text="@string/edit_activity_label_cancel"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent" />
 </android.support.constraint.ConstraintLayout>

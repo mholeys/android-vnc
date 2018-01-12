@@ -1,26 +1,50 @@
 <resources>
+
+    <!-- Common values -->
     <string name="app_name">Vnc</string>
-    <string name="title_activity_servers">Server List</string>
-    <string name="title_activity_server_list">ServerList</string>
-    <string name="title_activity_presentation">ServerList</string>
-    <string name="title_activity_vnc">VncActivity</string>
-
-    <string name="title_activity_fullscreen">FullscreenActivity</string>
-
-    <string name="dummy_button">Dummy Button</string>
-    <string name="dummy_content">DUMMY\nCONTENT</string>
-
     <string name="cast_app_id">FC3D72F0</string>
 
-    <string name="media_route_menu_title">Cast</string>
-    <string name="title_activity_input">InputActivity</string>
-    <string name="display_list_select_title">Display</string>
     <string name="vnc_default_port">5901</string>
+    <!-- End of common values -->
+
+    <!-- Server list activity values -->
+    <string name="title_activity_server_list">Server list</string>
+    <string name="media_route_menu_title">Cast</string>
+    <!-- End of Server list activity values-->
+
+    <!-- Add server activity -->
+    <string name="title_activity_add_server">Add server</string>
+
     <string name="add_activity_label_add">Add</string>
     <string name="add_activity_label_cancel">Cancel</string>
-
     <string name="add_activity_label_name">Name</string>
     <string name="add_activity_label_address">Address</string>
     <string name="add_activity_label_password">Password</string>
     <string name="add_activity_label_port">Port</string>
+    <!-- End of add server activity values -->
+
+    <!-- Edit server activity -->
+    <string name="title_activity_edit_server">Edit server</string>
+
+    <string name="edit_activity_label_edit">Save</string>
+    <string name="edit_activity_label_cancel">Cancel</string>
+    <string name="edit_activity_label_name">Name</string>
+    <string name="edit_activity_label_address">Address</string>
+    <string name="edit_activity_label_password">Password</string>
+    <string name="edit_activity_label_port">Port</string>
+    <!-- End of edit server activity values -->
+
+    <!-- Built-in viewer values -->
+    <string name="title_activity_vnc">VNC</string>
+    <string name="title_activity_input">InputActivity</string>
+    <!-- End of built-in viewer values -->
+
+    <!-- HDMI viewer values -->
+    <string name="title_activity_presentation">VNC</string>
+    <string name="title_activity_external_input">ExternalInputActivity</string>
+    <!-- End of HDMI viewer values -->
+
+    <!-- Display chooser values -->
+    <string name="display_list_select_title">Display</string>
+    <!-- End of Display chooser values -->
 </resources>

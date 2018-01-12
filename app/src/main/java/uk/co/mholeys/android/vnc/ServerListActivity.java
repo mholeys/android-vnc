@@ -344,6 +344,12 @@ public class ServerListActivity extends AppCompatActivity {
                         Log.d(TAG, "CAST onRemoteDisplaySessionError: ERROR in service");
                         initError(errorReason);
                     }
+
+                    @Override
+                    public void onRemoteDisplaySessionEnded(CastRemoteDisplayLocalService service) {
+                        Log.d(TAG, "onRemoteDisplaySessionEnded: Ended");
+                        teardown();
+                    }
                 });
         //TODO: change to not need any params in input activity
         Intent inputIntent = new Intent(this, CastInputActivity.class);
