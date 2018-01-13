@@ -212,8 +212,6 @@ public class ServerListActivity extends AppCompatActivity {
             }
 
             // Show display picker dialog
-            AlertDialog.Builder builder = new AlertDialog.Builder(ServerListActivity.this);
-            builder.setTitle(R.string.display_list_select_title);
             List<MediaRouter.RouteInfo> castRoutes = mCastMediaRouter.getRoutes();
             Log.d("Cast menu", ""+castRoutes.size());
 
@@ -229,6 +227,7 @@ public class ServerListActivity extends AppCompatActivity {
             int c = 0;
             for (MediaRouter.RouteInfo r : castRoutes) {
                 if (r.getDeviceType() == MediaRouter.RouteInfo.DEVICE_TYPE_TV) {
+                    // TODO: see if already active with this app?
                     displayNames[c] = r.getName();
                     displays.put(displayNames[c], r);
                     c++;
@@ -239,10 +238,9 @@ public class ServerListActivity extends AppCompatActivity {
                 displays.put(mDisplays.get(i).getName(), mDisplays.get(i));
             }
             final int castDeviceOffset = castDevices;
-            builder.setItems(displayNames, new DialogInterface.OnClickListener() {
+            DisplayPickerDialog dialog = new DisplayPickerDialog(this, this, displays, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int which) {
                     String name = displayNames[which];
-
                     if (displays.get(name) instanceof Display) {
                         if (mDisplays.get(which-castDeviceOffset).equals(getWindowManager().getDefaultDisplay())) {
                             startVncBuiltInDisplay(server);
@@ -250,16 +248,13 @@ public class ServerListActivity extends AppCompatActivity {
                         }
                         mSelectedDisplay = mDisplays.get(which-castDeviceOffset);
                         startVncPresentation(server, mSelectedDisplay);
-                        return;
                     } else if (displays.get(name) instanceof MediaRouter.RouteInfo) {
                         MediaRouter.RouteInfo routeInfo = (MediaRouter.RouteInfo) displays.get(name);
                         mSelectedCastDevice = CastDevice.getFromBundle(routeInfo.getExtras());
                         startCastViewer(server);
-                        return;
                     }
                 }
             });
-            AlertDialog dialog = builder.create();
             dialog.show();
             Log.d(TAG, "Dialog shown");
         } else {

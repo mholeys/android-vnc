@@ -46,5 +46,6 @@
 
     <!-- Display chooser values -->
     <string name="display_list_select_title">Display</string>
+    <string name="display_picker_popup_text">Pick a display device to use</string>
     <!-- End of Display chooser values -->
 </resources>
