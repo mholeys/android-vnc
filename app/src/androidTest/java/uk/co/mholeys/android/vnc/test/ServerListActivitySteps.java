@@ -52,11 +52,13 @@ public class ServerListActivitySteps {
     @Before
     public void setup() {
         Log.d("ServerListTest", "setup: ");
+        CommonSteps.disableAnimations();
     }
 
     @After
     public void tearDown() {
         Log.d("ServerListTest", "tearDown: ");
+        CommonSteps.enableAnimations();
     }
 
     @Nullable

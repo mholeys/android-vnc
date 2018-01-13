@@ -40,6 +40,17 @@ android {
             assets.srcDirs = ['src/androidTest/assets']
         }
     }
+    flavorDimensions "normal"
+    productFlavors {
+        dev {
+            dimension = "normal"
+            applicationId = "uk.co.mholeys.android.vnc" // Essential
+        }
+        production {
+            dimension = "normal"
+            applicationId = "uk.co.mholeys.android.vnc"
+        }
+    }
 }
 
 dependencies {
@@ -54,12 +65,38 @@ dependencies {
     implementation 'com.android.support:mediarouter-v7:26.1.0'
     implementation 'com.google.android.gms:play-services-cast-framework:11.8.0'
 
-    androidTestCompile 'com.android.support.test.espresso:espresso-core:3.0.1'
-    androidTestCompile 'com.android.support:support-annotations:26.1.0'  // <-- match with the support lib version
-    androidTestCompile 'info.cukes:cucumber-android:1.2.5@jar'
-    androidTestCompile 'info.cukes:cucumber-picocontainer:1.2.4'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
+    androidTestImplementation 'com.android.support:support-annotations:26.1.0'  // <-- match with the support lib version
+    androidTestImplementation 'info.cukes:cucumber-android:1.2.5@jar'
+    androidTestImplementation 'info.cukes:cucumber-picocontainer:1.2.4'
 
-    androidTestCompile 'com.squareup.spoon:spoon-client:1.7.1'
+    androidTestImplementation 'com.squareup.spoon:spoon-client:1.7.1'
 
     testImplementation 'junit:junit:4.12'
+}
+
+// Get the path to ADB.  Required when running tests directly from Android Studio.
+// Source: http://stackoverflow.com/a/26771087/112705
+
+def adb = android.getAdbExe().toString()
+
+// Source: http://stackoverflow.com/q/29908110/112705
+afterEvaluate {
+    task grantAnimationPermissionDev(type: Exec, dependsOn: 'installDevDebug') {
+        commandLine "$adb shell pm grant $android.productFlavors.dev.applicationId android.permission.SET_ANIMATION_SCALE".split(' ')
+    }
+
+    task grantAnimationPermissionProduction(type: Exec, dependsOn: 'installProductionDebug') {
+        commandLine "$adb shell pm grant $android.productFlavors.production.applicationId android.permission.SET_ANIMATION_SCALE".split(' ')
+    }
+
+    // When launching individual tests from Android Studio, it seems that only the assemble tasks
+    // get called directly, not the install* versions
+    tasks.each { task ->
+        if (task.name.startsWith('assembleDevDebugAndroidTest')) {
+            task.dependsOn grantAnimationPermissionDev
+        } else if (task.name.startsWith('assembleProductionDebugAndroidTest')) {
+            task.dependsOn grantAnimationPermissionProduction
+        }
+    }
 }

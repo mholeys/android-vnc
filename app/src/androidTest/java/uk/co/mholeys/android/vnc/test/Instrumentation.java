@@ -18,6 +18,7 @@ public class Instrumentation extends MonitoringInstrumentation {
         super.onCreate(arguments);
 
         mInstrumentationCore.create(arguments);
+
         start();
     }
 
@@ -28,4 +29,5 @@ public class Instrumentation extends MonitoringInstrumentation {
         waitForIdleSync();
         mInstrumentationCore.start();
     }
+
 }

@@ -22,6 +22,7 @@ import uk.co.mholeys.android.vnc.AddServerActivity;
 import static android.support.test.InstrumentationRegistry.getInstrumentation;
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.action.ViewActions.clearText;
+import static android.support.test.espresso.action.ViewActions.closeSoftKeyboard;
 import static android.support.test.espresso.action.ViewActions.typeText;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
@@ -45,11 +46,13 @@ public class AddServerActivitySteps {
     @Before
     public void setup() {
         Log.d("AddServerTest", "setup: ");
+        CommonSteps.disableAnimations();
     }
 
     @After
     public void tearDown() {
         Log.d("AddServerTest", "tearDown: ");
+        CommonSteps.enableAnimations();
     }
 
     @Nullable
@@ -72,16 +75,16 @@ public class AddServerActivitySteps {
         //onView(withText(field)).perform(typeText(value));
         switch (field.toLowerCase()) {
             case "name":
-                onView(withId(R.id.server_name_text)).perform(typeText(value));
+                onView(withId(R.id.server_name_text)).perform(closeSoftKeyboard()).perform(typeText(value));
                 break;
             case "address":
-                onView(withId(R.id.server_address_text)).perform(typeText(value));
+                onView(withId(R.id.server_address_text)).perform(closeSoftKeyboard()).perform(typeText(value));
                 break;
             case "port":
-                onView(withId(R.id.server_port_text)).perform(clearText()).perform(typeText(value));
+                onView(withId(R.id.server_port_text)).perform(closeSoftKeyboard()).perform(clearText()).perform(typeText(value));
                 break;
             case "password":
-                onView(withId(R.id.server_password_text)).perform(typeText(value));
+                onView(withId(R.id.server_password_text)).perform(closeSoftKeyboard()).perform(typeText(value));
                 break;
         }
     }

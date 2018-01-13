@@ -7,6 +7,7 @@ import cucumber.api.CucumberOptions;
 import cucumber.api.java.en.When;
 import uk.co.mholeys.android.vnc.*;
 
+import static android.support.test.InstrumentationRegistry.getInstrumentation;
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.action.ViewActions.click;
 import static android.support.test.espresso.action.ViewActions.closeSoftKeyboard;
@@ -24,6 +25,18 @@ import static org.hamcrest.Matchers.instanceOf;
 
 @CucumberOptions(features = "features")
 public class CommonSteps {
+
+    private static SystemAnimations mSystemAnimations;
+
+    public static void enableAnimations() {
+        mSystemAnimations = new SystemAnimations(getInstrumentation().getContext());
+        mSystemAnimations.enableAll();;
+    }
+
+    public static void disableAnimations() {
+        mSystemAnimations = new SystemAnimations(getInstrumentation().getContext());
+        mSystemAnimations.disableAll();
+    }
 
     @When("^I press (\\S+)$")
     public void I_press_x(String item) {
