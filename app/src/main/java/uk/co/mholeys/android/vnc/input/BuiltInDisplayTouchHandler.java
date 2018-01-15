@@ -348,8 +348,10 @@ public class BuiltInDisplayTouchHandler implements ITouchHandler {
         public boolean onScale(ScaleGestureDetector detector) {
             scale *= detector.getScaleFactor();
             scale = Math.max(0.1f, Math.min(scale, 5.0f));
-            screen.zoomScale = scale;
-            screen.update();
+            if (screen != null) {
+                screen.zoomScale = scale;
+                screen.update();
+            }
             return true;
         }
     }
