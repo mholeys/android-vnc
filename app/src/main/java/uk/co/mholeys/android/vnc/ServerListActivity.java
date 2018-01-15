@@ -10,7 +10,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Point;
 import android.hardware.display.DisplayManager;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AlertDialog;
@@ -99,21 +98,6 @@ public class ServerListActivity extends AppCompatActivity {
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Servers", Snackbar.LENGTH_LONG)
-                        .setAction("Add", new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                Log.d(TAG, "FAB: add action");
-                                addServerIntent();
-                            }
-                        }).show();
-            }
-        });
     }
 
     @Override
