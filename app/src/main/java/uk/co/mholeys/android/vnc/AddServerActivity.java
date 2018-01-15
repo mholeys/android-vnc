@@ -25,10 +25,10 @@ public class AddServerActivity extends AppCompatActivity {
         setContentView(R.layout.activity_add_server);
         setTitle(R.string.title_activity_add_server);
 
-        mName = (EditText) findViewById(R.id.server_name_text);
-        mAddress = (EditText) findViewById(R.id.server_address_text);
-        mPort = (EditText) findViewById(R.id.server_port_text);
-        mPassword = (EditText) findViewById(R.id.server_password_text);
+        mName = findViewById(R.id.server_name_text);
+        mAddress = findViewById(R.id.server_address_text);
+        mPort = findViewById(R.id.server_port_text);
+        mPassword = findViewById(R.id.server_password_text);
 
     }
 

@@ -1,6 +1,5 @@
 package uk.co.mholeys.android.vnc;
 
-import android.app.Activity;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -9,7 +8,6 @@ import uk.co.mholeys.vnc.data.PixelFormat;
 import uk.co.mholeys.vnc.display.input.FixedPassword;
 import uk.co.mholeys.vnc.display.input.IConnectionInformation;
 import uk.co.mholeys.vnc.display.input.IPasswordRequester;
-import uk.co.mholeys.vnc.log.Logger;
 
 import java.lang.ref.WeakReference;
 import java.net.InetAddress;
@@ -27,10 +25,10 @@ public class ServerData implements IConnectionInformation {
     public String address;
     public int port;
     public String password;
-    public InetAddress inetAddress;
+    InetAddress inetAddress;
     public volatile int result = -1;
 
-    public ServerData() {}
+    ServerData() {}
 
     public String toString() {
         return name + "\n" + address + ":" + port;
@@ -41,7 +39,7 @@ public class ServerData implements IConnectionInformation {
         return inetAddress;
     }
 
-    public void prepare() {
+    void prepare() {
         Log.d("ServerData", "preparing ");
         new ServerData.AddressFindTask(this).execute(address);
     }
@@ -77,7 +75,7 @@ public class ServerData implements IConnectionInformation {
             Log.d("Async", "onPostExecute: Set result to " + r);
             serverDataWeakReference.get().result = r;
         }
-    };
+    }
 
     @Override
     public int getPort() {

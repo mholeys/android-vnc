@@ -1,18 +1,14 @@
 package uk.co.mholeys.android.vnc;
 
-import android.app.Dialog;
 import android.app.PendingIntent;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
-import android.database.DataSetObserver;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Point;
 import android.hardware.display.DisplayManager;
 import android.os.Bundle;
-import android.support.design.widget.Snackbar;
 import android.support.v4.view.MenuItemCompat;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.MediaRouteActionProvider;
 import android.support.v7.media.MediaRouteSelector;
@@ -24,12 +20,9 @@ import android.util.Log;
 import android.view.ContextMenu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.ListAdapter;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.cast.CastDevice;
@@ -43,6 +36,8 @@ import java.util.List;
 
 import uk.co.mholeys.android.vnc.data.SQLHelper;
 import uk.co.mholeys.android.vnc.data.ServerEntry;
+
+import static android.support.v7.media.MediaRouter.*;
 
 public class ServerListActivity extends AppCompatActivity {
 
@@ -75,6 +70,7 @@ public class ServerListActivity extends AppCompatActivity {
     DisplayManager mDisplayManager;
     ArrayList<Display> mDisplays = new ArrayList<Display>();
     Display mSelectedDisplay = null;
+    private RouteInfo mSelectedCastRoute = null;
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -96,7 +92,7 @@ public class ServerListActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_servers);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
     }
 
@@ -121,6 +117,9 @@ public class ServerListActivity extends AppCompatActivity {
         String option = (String) item.getTitle();
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
         ServerEntry serverEntry = listItems.getItem((int) info.id);
+        if (serverEntry == null) {
+            return false;
+        }
         ServerData server = serverEntry.serverData;
         switch (option) {
             case "Connect":
@@ -212,7 +211,7 @@ public class ServerListActivity extends AppCompatActivity {
 
             int castDevices = 0;
             for (int i = 0; i < castRoutes.size(); i++) {
-                if (castRoutes.get(i).getDeviceType() == MediaRouter.RouteInfo.DEVICE_TYPE_TV) {
+                if (castRoutes.get(i).getDeviceType() == RouteInfo.DEVICE_TYPE_TV) {
                     castDevices++;
                 }
             }
@@ -220,8 +219,8 @@ public class ServerListActivity extends AppCompatActivity {
             final String[] displayNames = new String[castDevices + mDisplays.size()];
             final HashMap<String, Object> displays = new HashMap<String, Object>();
             int c = 0;
-            for (MediaRouter.RouteInfo r : castRoutes) {
-                if (r.getDeviceType() == MediaRouter.RouteInfo.DEVICE_TYPE_TV) {
+            for (RouteInfo r : castRoutes) {
+                if (r.getDeviceType() == RouteInfo.DEVICE_TYPE_TV) {
                     // TODO: see if already active with this app?
                     displayNames[c] = r.getName();
                     displays.put(displayNames[c], r);
@@ -243,8 +242,8 @@ public class ServerListActivity extends AppCompatActivity {
                         }
                         mSelectedDisplay = mDisplays.get(which-castDeviceOffset);
                         startVncPresentation(server, mSelectedDisplay);
-                    } else if (displays.get(name) instanceof MediaRouter.RouteInfo) {
-                        MediaRouter.RouteInfo routeInfo = (MediaRouter.RouteInfo) displays.get(name);
+                    } else if (displays.get(name) instanceof RouteInfo) {
+                        RouteInfo routeInfo = (RouteInfo) displays.get(name);
                         mSelectedCastDevice = CastDevice.getFromBundle(routeInfo.getExtras());
                         startCastViewer(server);
                     }
@@ -324,7 +323,7 @@ public class ServerListActivity extends AppCompatActivity {
                             CastRemoteDisplayLocalService service) {
                         Log.d(TAG, "CAST onRemoteDisplaySessionStarted: Started service");
                         // Initialize sender UI
-                        CastPresentationService pService = (CastPresentationService) service;
+                        //CastPresentationService pService = (CastPresentationService) service;
                         mCasting = true;
                     }
 
@@ -350,20 +349,20 @@ public class ServerListActivity extends AppCompatActivity {
         SQLiteDatabase db = new SQLHelper(this).getReadableDatabase();
 
         db.beginTransaction();
-        String[] projection = {
+/*        String[] projection = {
                 SQLHelper.SERVER_COLUMN_ID,
                 SQLHelper.SERVER_COLUMN_NAME,
                 SQLHelper.SERVER_COLUMN_ADDRESS,
                 SQLHelper.SERVER_COLUMN_PORT,
                 SQLHelper.SERVER_COLUMN_PASSWORD
-        };
+        };*/
 
         Cursor cursor = db.rawQuery("select * from " + SQLHelper.SERVERS_TABLE_NAME + " ORDER BY " + SQLHelper.SERVER_COLUMN_NAME + " ASC", null);
 
         listItems.clear();
 
         if (cursor.moveToFirst()) {
-            while (cursor.isAfterLast() == false) {
+            while (!cursor.isAfterLast()) {
                 int id = cursor.getInt(cursor.getColumnIndex(SQLHelper.SERVER_COLUMN_ID));
                 String name = cursor.getString(cursor.getColumnIndex(SQLHelper.SERVER_COLUMN_NAME));
                 String address = cursor.getString(cursor.getColumnIndex(SQLHelper.SERVER_COLUMN_ADDRESS));
@@ -385,6 +384,7 @@ public class ServerListActivity extends AppCompatActivity {
                 cursor.moveToNext();
             }
         }
+        cursor.close();
         db.setTransactionSuccessful();
         db.endTransaction();
         db.close();
@@ -408,14 +408,12 @@ public class ServerListActivity extends AppCompatActivity {
 
         if (mSelectedCastDevice != null) {
             if (mCastMediaRouter != null) {
-                if (mCastMediaRouter.getSelectedRoute() != null) {
-                    // See if this was selected using the cast selection button
-                    if (!mCastMediaRouter.getSelectedRoute().equals(mSelectedCastDevice)) {
-                        // Assume that this was picked using the popup so we need to ignore it
-                        Log.d(TAG, "onResume: Selected device does not match cast selected");
-                        mSelectedCastDevice = null;
+                // See if this was selected using the cast selection button
+                if (!mCastMediaRouter.getSelectedRoute().equals(mSelectedCastRoute)) {
+                    // Assume that this was picked using the popup so we need to ignore it
+                    Log.d(TAG, "onResume: Selected device does not match cast selected");
+                    mSelectedCastDevice = null;
 
-                    }
                 }
             }
         }
@@ -423,7 +421,7 @@ public class ServerListActivity extends AppCompatActivity {
         mSelectedDisplay = null;
 
         // Setup server list
-        serverList = (ListView) findViewById(R.id.server_list_view);
+        serverList = findViewById(R.id.server_list_view);
         listItems = new ArrayAdapter<ServerEntry>(this, R.layout.list_layout);
 
         serverList.setOnCreateContextMenuListener(this);
@@ -456,7 +454,7 @@ public class ServerListActivity extends AppCompatActivity {
     protected void setupDisplays() {
         // Setup cast button
         // Get a media router to use
-        mCastMediaRouter = MediaRouter.getInstance(getApplicationContext());
+        mCastMediaRouter = getInstance(getApplicationContext());
         // Find a cast device that is compatible
         mCastMediaRouteSelector = new MediaRouteSelector.Builder()
                 .addControlCategory( CastMediaControlIntent.categoryForCast(REMOTE_DISPLAY_APP_ID))
@@ -494,7 +492,7 @@ public class ServerListActivity extends AppCompatActivity {
 
         // Look for cast devices
         mCastMediaRouter.addCallback(mCastMediaRouteSelector, mCastMediaRouterCallback,
-                MediaRouter.CALLBACK_FLAG_REQUEST_DISCOVERY);
+                CALLBACK_FLAG_REQUEST_DISCOVERY);
         // Remove previously selected display
         mSelectedDisplay = null;
         // Clear list of displays
@@ -512,18 +510,19 @@ public class ServerListActivity extends AppCompatActivity {
         }
     }
 
-    private class MyMediaRouterCallback extends MediaRouter.Callback {
+    private class MyMediaRouterCallback extends Callback {
 
         @Override
-        public void onRouteSelected(MediaRouter router, MediaRouter.RouteInfo info) {
+        public void onRouteSelected(MediaRouter router, RouteInfo info) {
             mSelectedCastDevice = CastDevice.getFromBundle(info.getExtras());
-            String routeId = info.getId();
+            mSelectedCastRoute = info;
         }
 
         @Override
-        public void onRouteUnselected(MediaRouter router, MediaRouter.RouteInfo info) {
+        public void onRouteUnselected(MediaRouter router, RouteInfo info) {
             teardown();
             mSelectedCastDevice = null;
+            mSelectedCastRoute = null;
             CastRemoteDisplayLocalService.stopService();
         }
     }

@@ -1,7 +1,6 @@
 package uk.co.mholeys.android.vnc;
 
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.os.Handler;
@@ -10,10 +9,7 @@ import android.os.Message;
 import android.util.Log;
 import android.view.Display;
 import android.view.WindowManager;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
-import android.widget.Toast;
 
 import com.google.android.gms.cast.CastPresentation;
 import com.google.android.gms.cast.CastRemoteDisplayLocalService;
@@ -22,7 +18,6 @@ import java.io.IOException;
 import java.net.SocketException;
 
 import uk.co.mholeys.android.vnc.display.AndroidDisplay;
-import uk.co.mholeys.android.vnc.display.AndroidInterface;
 import uk.co.mholeys.android.vnc.display.AndroidScreen;
 import uk.co.mholeys.android.vnc.display.CastInterface;
 import uk.co.mholeys.android.vnc.input.AndroidKeyboard;
@@ -38,7 +33,6 @@ public class CastPresentationService extends CastRemoteDisplayLocalService {
     private static final String TAG = "VNC.pres.service";
     VNCPresentation mPresentation;
 
-    private Thread mProtoThread;
     VNCProtocol protocol;
     ServerData connection;
     //FIXME: Cannot store context statically "Warning:(41, 5) Do not place Android context classes in static fields (static reference to `CastInterface` which has field `context` pointing to `Context`); this is a memory leak (and also breaks Instant Run)"
@@ -112,8 +106,8 @@ public class CastPresentationService extends CastRemoteDisplayLocalService {
 
         private static final String TAG = "VNC.pres.cast";
 
-        public VNCPresentation(Context context,
-                               Display display, ServerData connection) {
+        VNCPresentation(Context context,
+                        Display display, ServerData connection) {
             super(context, display);
             this.connection = connection;
             this.castDdisplay = display;
@@ -152,7 +146,7 @@ public class CastPresentationService extends CastRemoteDisplayLocalService {
             mouse = (AndroidMouse) castInterface.getMouseManager();
             keyboard = (AndroidKeyboard) castInterface.getKeyboardManager();
 
-            RelativeLayout layout = (RelativeLayout) findViewById(R.id.layoutCastVnc);
+            RelativeLayout layout = findViewById(R.id.layoutCastVnc);
 
             Point p = new Point();
             castDdisplay.getSize(p);
@@ -161,7 +155,7 @@ public class CastPresentationService extends CastRemoteDisplayLocalService {
 
             Log.d(TAG, "onCreate: Creating thread " + mReady);
             if (mReady) {
-                mProtoThread = new Thread() {
+                Thread mProtoThread = new Thread() {
                     @Override
                     public void run() {
                         if (Looper.myLooper() == null) {
@@ -202,7 +196,8 @@ public class CastPresentationService extends CastRemoteDisplayLocalService {
                             } catch (NullPointerException e) {
                                 e.printStackTrace();
                             }
-                            l.quit();
+                            if (l != null)
+                                l.quit();
                         }
                     }
                 };

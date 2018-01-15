@@ -47,5 +47,9 @@
     <!-- Display chooser values -->
     <string name="display_list_select_title">Display</string>
     <string name="display_picker_popup_text">Pick a display device to use</string>
+    <string name="add_server_action_bar">Add server</string>
+    <string name="search_action_bar">Search</string>
+    <string name="delete_server_action_bar">Delete</string>
+    <string name="delete_multiple_action_bar">Delete multiple</string>
     <!-- End of Display chooser values -->
 </resources>

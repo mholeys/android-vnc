@@ -9,7 +9,7 @@ import java.io.OutputStream;
  */
 public class LoggerOutStream extends OutputStream {
 
-    String message = "";
+    private String message = "";
 
     public void write(int i) {
         if (i == '\n') {

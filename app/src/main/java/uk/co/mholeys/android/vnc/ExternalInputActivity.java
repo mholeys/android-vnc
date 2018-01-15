@@ -51,7 +51,9 @@ public class ExternalInputActivity extends InputActivity {
             return;
         }
         mDisplayManager = (DisplayManager) getSystemService(DISPLAY_SERVICE);
-        mDisplay = mDisplayManager.getDisplay(displayId);
+        if (mDisplayManager != null) {
+            mDisplay = mDisplayManager.getDisplay(displayId);
+        }
 
         connection = new ServerData();
         connection.inetAddress = (InetAddress) intent.getSerializableExtra(ServerListActivity.SERVER_INFO_CONNECTION);
