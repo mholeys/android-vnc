@@ -3,21 +3,15 @@ package uk.co.mholeys.android.vnc;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.database.DataSetObserver;
-import android.graphics.drawable.Drawable;
-import android.hardware.display.DisplayManager;
-import android.media.Image;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.media.MediaRouter;
-import android.support.v7.view.menu.ListMenuItemView;
 import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
@@ -25,9 +19,6 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
-
-import static android.content.Context.DISPLAY_SERVICE;
 
 /**
  * Created by Matthew on 12/01/2018.
@@ -53,7 +44,7 @@ public class DisplayPickerDialog extends Dialog {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.display_dialog_layout);
+        setContentView(R.layout.dialog_display_layout);
         setTitle(R.string.display_list_select_title);
 
         mListView = findViewById(R.id.dialog_list);
