@@ -11,6 +11,7 @@ import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ListAdapter;
@@ -26,15 +27,12 @@ import java.util.HashMap;
 
 public class DisplayPickerDialog extends Dialog {
 
-    HashMap<String, Object> displays;
-    ArrayList<DisplayItem> displayItems = new ArrayList<DisplayItem>();
-    DisplayListAdapter listAdapter;
-    OnClickListener onClickListener;
-    Activity activity;
+    private HashMap<String, Object> displays;
+    private ArrayList<DisplayItem> displayItems = new ArrayList<DisplayItem>();
+    private OnClickListener onClickListener;
+    private Activity activity;
 
-    ListView mListView;
-
-    public DisplayPickerDialog(@NonNull Context context, Activity activity, HashMap<String, Object> displays, OnClickListener onClickListener) {
+    DisplayPickerDialog(@NonNull Context context, Activity activity, HashMap<String, Object> displays, OnClickListener onClickListener) {
         super(context);
         this.activity = activity;
         this.displays = displays;
@@ -47,9 +45,13 @@ public class DisplayPickerDialog extends Dialog {
         setContentView(R.layout.dialog_display_layout);
         setTitle(R.string.display_list_select_title);
 
-        mListView = findViewById(R.id.dialog_list);
+        ListView mListView = findViewById(R.id.dialog_list);
 
-        Display builtin = getWindow().getWindowManager().getDefaultDisplay();
+        Window window = getWindow();
+        Display builtin = null;
+        if (window != null) {
+            builtin = window.getWindowManager().getDefaultDisplay();
+        }
 
         for (String name : displays.keySet()) {
             Object d = displays.get(name);
@@ -70,7 +72,7 @@ public class DisplayPickerDialog extends Dialog {
             }
         }
 
-        listAdapter = new DisplayListAdapter(activity, displayItems);
+        DisplayListAdapter listAdapter = new DisplayListAdapter(activity, displayItems);
         mListView.setAdapter(listAdapter);
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
@@ -87,7 +89,7 @@ public class DisplayPickerDialog extends Dialog {
         String name;
         String extra;
 
-        public DisplayItem(int image, String name, String extra) {
+        DisplayItem(int image, String name, String extra) {
             this.image = image;
             this.name = name;
             this.extra = extra;
@@ -99,7 +101,7 @@ public class DisplayPickerDialog extends Dialog {
         Activity activity;
         ArrayList<DisplayItem> displays = new ArrayList<DisplayItem>();
 
-        public DisplayListAdapter(Activity activity, ArrayList<DisplayItem> displays) {
+        DisplayListAdapter(Activity activity, ArrayList<DisplayItem> displays) {
             this.activity = activity;
             this.displays = displays;
         }
@@ -145,18 +147,28 @@ public class DisplayPickerDialog extends Dialog {
         }
 
         @Override
-        public View getView(int i, View view, ViewGroup viewGroup) {
-            LayoutInflater inflater = activity.getLayoutInflater();
-            View rowView = inflater.inflate(R.layout.display_list_item_view, null,true);
+        public View getView(int position, View convertView, ViewGroup parent) {
+            DisplayHolder mDisplayHolder;
 
-            TextView nameText = rowView.findViewById(R.id.item_name_text);
-            ImageView imageView = rowView.findViewById(R.id.icon);
-            TextView extraText = rowView.findViewById(R.id.extra_text);
+            if (convertView == null) {
+                mDisplayHolder = new DisplayHolder();
 
-            nameText.setText(displays.get(i).name);
-            imageView.setImageResource(displays.get(i).image);
-            extraText.setText(displays.get(i).extra);
-            return rowView;
+                LayoutInflater inflater = activity.getLayoutInflater();
+
+                convertView = inflater.inflate(R.layout.display_list_item_view, parent,false);
+                mDisplayHolder.nameText = convertView.findViewById(R.id.item_name_text);
+                mDisplayHolder.imageView = convertView.findViewById(R.id.icon);
+                mDisplayHolder.extraText = convertView.findViewById(R.id.extra_text);
+
+                convertView.setTag(mDisplayHolder);
+            } else {
+                mDisplayHolder = (DisplayHolder) convertView.getTag();
+            }
+            mDisplayHolder.nameText.setText(displays.get(position).name);
+            mDisplayHolder.imageView.setImageResource(displays.get(position).image);
+            mDisplayHolder.extraText.setText(displays.get(position).extra);
+
+            return convertView;
         }
 
         @Override
@@ -173,6 +185,12 @@ public class DisplayPickerDialog extends Dialog {
         public boolean isEmpty() {
             return displayItems.isEmpty();
         }
+    }
+
+    static class DisplayHolder {
+        TextView nameText;
+        ImageView imageView;
+        TextView extraText;
     }
 
 }
