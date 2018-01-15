@@ -143,10 +143,21 @@ public class ServerListActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
 
-        if (id == R.id.add_server_action_bar_button) {
-            Log.d(TAG, "ACTION: add action");
-            addServerIntent();
-            return true;
+        switch (id) {
+            case R.id.add_server_action_bar_button:
+                Log.d(TAG, "ACTION: add action");
+                addServerIntent();
+                return true;
+            /* TODO
+            case R.id.search_action_bar_button:
+                Log.d(TAG, "ACTION: search action");
+                searchServers();
+                return true;*/
+            /* TODO:
+            case R.id.delete_multiple_action_bar_button:
+                Log.d(TAG, "ACTION: delete multiple action");
+                deleteMultipleServers();
+                return true;*/
         }
 
         return super.onOptionsItemSelected(item);

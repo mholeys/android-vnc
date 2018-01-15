@@ -4,13 +4,27 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/add_server_action_bar_button"
-        android:icon="@android:drawable/ic_input_add"
+        android:icon="@android:drawable/ic_menu_add"
         android:orderInCategory="0"
-        android:title="Add server"
-        app:showAsAction="always" />
+        android:title="@string/add_server_action_bar"
+        app:showAsAction="ifRoom" />
     <item
         android:id="@+id/media_route_menu_item"
         android:title="@string/media_route_menu_title"
         app:actionProviderClass="android.support.v7.app.MediaRouteActionProvider"
-        app:showAsAction="always"/>
+        app:showAsAction="ifRoom"/>
+    <!--
+        TODO:
+      <item
+        android:id="@+id/search_action_bar_button"
+        android:icon="@android:drawable/ic_menu_search"
+        android:title="@string/search_action_bar"
+        app:showAsAction="never" /> -->
+    <!--
+        TODO:
+    <item
+        android:id="@+id/delete_multiple_action_bar_button"
+        android:icon="@android:drawable/ic_menu_delete"
+        android:title="@string/delete_multiple_action_bar"
+        app:showAsAction="never" /> -->
 </menu>
