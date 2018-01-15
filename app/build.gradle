@@ -103,5 +103,5 @@ afterEvaluate {
 }
 
 task fetchScreenshots(type: Exec) {
-    commandLine "$adb pull /sdcard/screenshots $buildDir/screenshots/".split(' ')
+    commandLine "$adb pull /storage/emulated/0/screenshots $buildDir/screenshots/".split(' ')
 }
