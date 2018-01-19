@@ -7,6 +7,7 @@ import android.database.DataSetObserver;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.media.MediaRouter;
+import android.util.Log;
 import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,6 +21,7 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.ListIterator;
 
 /**
  * Created by Matthew on 12/01/2018.
@@ -27,12 +29,12 @@ import java.util.HashMap;
 
 public class DisplayPickerDialog extends Dialog {
 
-    private HashMap<String, Object> displays;
+    private ArrayList<Object> displays;
     private ArrayList<DisplayItem> displayItems = new ArrayList<DisplayItem>();
     private OnClickListener onClickListener;
     private Activity activity;
 
-    DisplayPickerDialog(@NonNull Context context, Activity activity, HashMap<String, Object> displays, OnClickListener onClickListener) {
+    DisplayPickerDialog(@NonNull Context context, Activity activity, ArrayList<Object> displays, OnClickListener onClickListener) {
         super(context);
         this.activity = activity;
         this.displays = displays;
@@ -53,21 +55,23 @@ public class DisplayPickerDialog extends Dialog {
             builtin = window.getWindowManager().getDefaultDisplay();
         }
 
-        for (String name : displays.keySet()) {
-            Object d = displays.get(name);
-            if (d instanceof MediaRouter.RouteInfo) {
+        for (Object d : displays) {
+            if (d instanceof String) {
+                DisplayItem di = new DisplayItem(R.drawable.ic_cast_black_48dp, "Current cast device", "");
+                displayItems.add(di);
+            } else if (d instanceof MediaRouter.RouteInfo) {
                 // Cast
                 MediaRouter.RouteInfo route = (MediaRouter.RouteInfo) d;
-                DisplayItem di = new DisplayItem(R.drawable.quantum_ic_cast_white_36, route.getName(), "Chromecast device");
+                DisplayItem di = new DisplayItem(R.drawable.ic_cast_black_48dp, route.getName(), activity.getString(R.string.display_device_label_chromecast));
                 displayItems.add(di);
             } else if (d instanceof Display) {
                 Display display = (Display) d;
-                DisplayItem di = new DisplayItem(R.drawable.quantum_ic_cast_white_36, display.getName(), "External Display");
+                Display.Mode mode = display.getMode();
+                String resolution = " " + mode.getPhysicalWidth() + "x" + mode.getPhysicalHeight();
+                DisplayItem di = new DisplayItem(R.drawable.ic_tv_black_48dp, display.getName(), activity.getString(R.string.display_device_label_external) + resolution);
                 if (display.equals(builtin)) {
-                    di = new DisplayItem(R.drawable.quantum_ic_cast_white_36, display.getName(), "Built-In screen");
+                    di = new DisplayItem(R.drawable.ic_smartphone_black_48dp, display.getName(), activity.getString(R.string.display_device_label_builtin) + resolution);
                 }
-                // Detect built in
-                //DisplayItem di = new DisplayItem(R.drawable.hdmi_display, display.getName(), "External Display");
                 displayItems.add(di);
             }
         }

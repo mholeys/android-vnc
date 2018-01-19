@@ -2,7 +2,7 @@
 
     <!-- Common values -->
     <string name="app_name">Vnc</string>
-    <string name="cast_app_id">FC3D72F0</string>
+    <string name="cast_app_id">B461FB4F</string>
 
     <string name="vnc_default_port">5901</string>
     <!-- End of common values -->
@@ -10,6 +10,8 @@
     <!-- Server list activity values -->
     <string name="title_activity_server_list">Server list</string>
     <string name="media_route_menu_title">Cast</string>
+    <string name="add_server_action_bar">Add server</string>
+    <string name="search_action_bar">Search</string>
     <!-- End of Server list activity values-->
 
     <!-- Add server activity -->
@@ -47,9 +49,11 @@
     <!-- Display chooser values -->
     <string name="display_list_select_title">Display</string>
     <string name="display_picker_popup_text">Pick a display device to use</string>
-    <string name="add_server_action_bar">Add server</string>
-    <string name="search_action_bar">Search</string>
     <string name="delete_server_action_bar">Delete</string>
     <string name="delete_multiple_action_bar">Delete multiple</string>
+    <string name="display_device_label_chromecast">Chromecast device</string>
+    <string name="display_device_label_external">External display</string>
+    <string name="display_device_label_builtin">Built-in screen</string>
+    <string name="settings_action_bar">Settings</string>
     <!-- End of Display chooser values -->
 </resources>

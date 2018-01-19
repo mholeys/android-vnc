@@ -27,6 +27,7 @@ import android.widget.Toast;
 
 import com.google.android.gms.cast.CastDevice;
 import com.google.android.gms.cast.CastMediaControlIntent;
+import com.google.android.gms.cast.CastRemoteDisplay;
 import com.google.android.gms.cast.CastRemoteDisplayLocalService;
 import com.google.android.gms.common.api.Status;
 
@@ -58,7 +59,7 @@ public class ServerListActivity extends AppCompatActivity {
             ArrayAdapter<ServerEntry> listItems;
     ListView serverList;
 
-    public static final String REMOTE_DISPLAY_APP_ID = "B461FB4F";
+    //public static final String REMOTE_DISPLAY_APP_ID = "B461FB4F";
 
     MediaRouter mCastMediaRouter;
     MediaRouteSelector mCastMediaRouteSelector;
@@ -102,7 +103,6 @@ public class ServerListActivity extends AppCompatActivity {
 
         // groupId, itemId, order, title
         menu.add(0, v.getId(), 0, "Connect");
-        //menu.add(0, v.getId(), 0, "Cast");
         menu.add(0, v.getId(), 0, "Delete");
         menu.add(0, v.getId(), 0, "Edit");
     }
@@ -146,6 +146,10 @@ public class ServerListActivity extends AppCompatActivity {
             case R.id.add_server_action_bar_button:
                 Log.d(TAG, "ACTION: add action");
                 addServerIntent();
+                return true;
+            case R.id.settings_action_bar_button:
+                Log.d(TAG, "ACTION: settings action");
+                //openSettings();
                 return true;
             /* TODO
             case R.id.search_action_bar_button:
@@ -216,34 +220,30 @@ public class ServerListActivity extends AppCompatActivity {
                 }
             }
 
-            final String[] displayNames = new String[castDevices + mDisplays.size()];
-            final HashMap<String, Object> displays = new HashMap<String, Object>();
-            int c = 0;
+            final ArrayList<Object> displays = new ArrayList<>();
             for (RouteInfo r : castRoutes) {
                 if (r.getDeviceType() == RouteInfo.DEVICE_TYPE_TV) {
-                    // TODO: see if already active with this app?
-                    displayNames[c] = r.getName();
-                    displays.put(displayNames[c], r);
-                    c++;
+                    if (r.isSelected() || (r.getConnectionState() == RouteInfo.CONNECTION_STATE_CONNECTED)) {
+                        displays.add("");
+                    } else {
+                        displays.add(r);
+                    }
                 }
             }
-            for (int i = 0; i < mDisplays.size(); i++) {
-                displayNames[i + castDevices] = mDisplays.get(i).getName();
-                displays.put(mDisplays.get(i).getName(), mDisplays.get(i));
-            }
+            displays.addAll(mDisplays);
+
             final int castDeviceOffset = castDevices;
             DisplayPickerDialog dialog = new DisplayPickerDialog(this, this, displays, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int which) {
-                    String name = displayNames[which];
-                    if (displays.get(name) instanceof Display) {
+                    if (displays.get(which) instanceof Display) {
                         if (mDisplays.get(which-castDeviceOffset).equals(getWindowManager().getDefaultDisplay())) {
                             startVncBuiltInDisplay(server);
                             return;
                         }
                         mSelectedDisplay = mDisplays.get(which-castDeviceOffset);
                         startVncPresentation(server, mSelectedDisplay);
-                    } else if (displays.get(name) instanceof RouteInfo) {
-                        RouteInfo routeInfo = (RouteInfo) displays.get(name);
+                    } else if (displays.get(which) instanceof RouteInfo) {
+                        RouteInfo routeInfo = (RouteInfo) displays.get(which);
                         mSelectedCastDevice = CastDevice.getFromBundle(routeInfo.getExtras());
                         startCastViewer(server);
                     }
@@ -304,7 +304,7 @@ public class ServerListActivity extends AppCompatActivity {
 
         CastRemoteDisplayLocalService.startService(
                 getApplicationContext(),
-                CastPresentationService.class, REMOTE_DISPLAY_APP_ID,
+                CastPresentationService.class, getResources().getString(R.string.cast_app_id),
                 mSelectedCastDevice, settings,
                 new CastRemoteDisplayLocalService.Callbacks() {
                     @Override
@@ -457,7 +457,7 @@ public class ServerListActivity extends AppCompatActivity {
         mCastMediaRouter = getInstance(getApplicationContext());
         // Find a cast device that is compatible
         mCastMediaRouteSelector = new MediaRouteSelector.Builder()
-                .addControlCategory( CastMediaControlIntent.categoryForCast(REMOTE_DISPLAY_APP_ID))
+                .addControlCategory( CastMediaControlIntent.categoryForCast(getResources().getString(R.string.cast_app_id)))
                 .build();
         mCastMediaRouterCallback = new MyMediaRouterCallback();
 
@@ -469,6 +469,7 @@ public class ServerListActivity extends AppCompatActivity {
             @Override
             public void onDisplayAdded(int displayId) {
                 Display d = mDisplayManager.getDisplay(displayId);
+
                 Log.d("DisplayListener", "Adding a display");
                 mDisplays.add(d);
             }

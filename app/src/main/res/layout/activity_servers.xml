@@ -12,9 +12,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:fitsSystemWindows="false"
-        android:theme="@style/AppTheme.AppBarOverlay"
         android:visibility="visible"
         app:expanded="false">
+    <!--android:theme="@style/AppTheme.AppBarOverlay"-->
 
         <android.support.v7.widget.Toolbar
             android:id="@+id/toolbar"
@@ -22,9 +22,9 @@
             android:layout_height="wrap_content"
             android:theme="@style/AppTheme"
             android:visibility="visible"
-            app:popupTheme="@style/AppTheme.PopupOverlay"
             app:title="Servers"
-            app:titleTextColor="@android:color/white" />
+        app:titleTextColor="@android:color/white" />
+        <!--app:popupTheme="@style/AppTheme.PopupOverlay"-->
 
     </android.support.design.widget.AppBarLayout>
 
