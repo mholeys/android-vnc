@@ -79,6 +79,9 @@ public class ServerListActivitySteps {
     @Given("^I am on the ServerListActivity$")
     public void given_server_list_activity() {
         if (activityTestRule.getActivity() == null) {
+            if (getActivity() instanceof ServerListActivity) {
+                return;
+            }
             activityTestRule.launchActivity(null);
         }
     }
