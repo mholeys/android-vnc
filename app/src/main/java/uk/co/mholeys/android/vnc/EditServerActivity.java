@@ -11,7 +11,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 
-import uk.co.mholeys.android.vnc.data.SQLHelper;
+import uk.co.mholeys.android.vnc.data.ServerDataSQLHelper;
 
 public class EditServerActivity extends AppCompatActivity {
 
@@ -46,14 +46,14 @@ public class EditServerActivity extends AppCompatActivity {
         String address = mAddress.getText().toString();
         int port = Integer.parseInt(mPort.getText().toString());
         String password = mPassword.getText().toString();
-        SQLiteDatabase db = new SQLHelper(this).getWritableDatabase();
+        SQLiteDatabase db = new ServerDataSQLHelper(this).getWritableDatabase();
         db.beginTransaction();
         ContentValues values = new ContentValues();
-        values.put(SQLHelper.SERVER_COLUMN_NAME, name);
-        values.put(SQLHelper.SERVER_COLUMN_ADDRESS, address);
-        values.put(SQLHelper.SERVER_COLUMN_PORT, port);
-        values.put(SQLHelper.SERVER_COLUMN_PASSWORD, password);
-        int rowsEffected = db.update(SQLHelper.SERVERS_TABLE_NAME, values, SQLHelper.SERVER_COLUMN_ID + "=?", new String[] {""+id});
+        values.put(ServerDataSQLHelper.SERVER_COLUMN_NAME, name);
+        values.put(ServerDataSQLHelper.SERVER_COLUMN_ADDRESS, address);
+        values.put(ServerDataSQLHelper.SERVER_COLUMN_PORT, port);
+        values.put(ServerDataSQLHelper.SERVER_COLUMN_PASSWORD, password);
+        int rowsEffected = db.update(ServerDataSQLHelper.SERVERS_TABLE_NAME, values, ServerDataSQLHelper.SERVER_COLUMN_ID + "=?", new String[] {""+id});
         Log.d("EditServer", "Changed " + rowsEffected);
         db.setTransactionSuccessful();
         db.endTransaction();

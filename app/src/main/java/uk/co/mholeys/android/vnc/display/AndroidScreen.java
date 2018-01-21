@@ -3,11 +3,7 @@ package uk.co.mholeys.android.vnc.display;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffXfermode;
-import android.provider.Settings;
 import android.util.Log;
 
 import java.util.NoSuchElementException;
@@ -20,30 +16,27 @@ import uk.co.mholeys.vnc.display.data.JPEGScreenUpdate;
 import uk.co.mholeys.vnc.display.data.PaletteScreenUpdate;
 import uk.co.mholeys.vnc.display.data.RawScreenUpdate;
 import uk.co.mholeys.vnc.display.data.ScreenUpdate;
-import uk.co.mholeys.vnc.log.Logger;
 
 /**
  * Created by Matthew on 25/09/2016.
+ * Drawing manager
  */
 public class AndroidScreen implements IScreen {
 
-    long last = 0;
-    long delta = 0;
-    int fps = 0;
-
     AndroidDisplay display;
-    public static Bitmap bitmap;
-    public static Bitmap mouseBitmap;
-    public UpdateManager updateManager;
+    Bitmap bitmap;
+    Bitmap mouseBitmap;
+    UpdateManager updateManager;
     private int width;
     private int height;
     public double zoomScale = 1;
-    public double cutWidth = 0;
-    public double cutHeight = 0;
     public float cutX = 0;
     public float cutY = 0;
 
-    public int mouseX, mouseY, mouseCenterX, mouseCenterY, mouseW, mouseH;
+    int mouseX;
+    int mouseY;
+    int mouseCenterX;
+    int mouseCenterY;
 
     public AndroidScreen(int width, int height) {
         setSize(width, height);
@@ -56,12 +49,12 @@ public class AndroidScreen implements IScreen {
                 bitmap.setPixel(xA, yA, pixels[(xA - x) + ((yA - y) * width)]);
             }
         }
-        fpsCounter();
     }
 
     @Override
     public void drawPalette(int x, int y, int width, int height, int[] palette, int paletteSize, byte[] data) {
         if (2 == paletteSize) {
+            // Binary colours
             int dx, dy, n;
             int xA = x;
             int yA = y;
@@ -97,7 +90,6 @@ public class AndroidScreen implements IScreen {
                 }
             }
         }
-        fpsCounter();
     }
 
     @Override
@@ -106,7 +98,6 @@ public class AndroidScreen implements IScreen {
         Canvas canvas = new Canvas(bitmap);
         canvas.drawBitmap(jpeg, x, y, new Paint());
         jpeg.recycle();
-        fpsCounter();
     }
 
     @Override
@@ -117,7 +108,6 @@ public class AndroidScreen implements IScreen {
         Bitmap sub = Bitmap.createBitmap(copied, 0, width, width, height, Bitmap.Config.ARGB_8888);
         canvas.drawBitmap(sub, x, y, new Paint());
         sub.recycle();
-        fpsCounter();
     }
 
     @Override
@@ -126,16 +116,18 @@ public class AndroidScreen implements IScreen {
         Paint c = new Paint();
         c.setColor(color | 0xFF000000);
         canvas.drawRect(x, y, x+width, y+height, c);
-        fpsCounter();
     }
 
     public void update() {
         display.invalidate();
     }
 
+    /**
+     * Does not work on android. Do not use
+     */
     @Override
     public int[] getPixels() {
-        return new int[0];
+        return null;
     }
 
     @Override
@@ -161,8 +153,6 @@ public class AndroidScreen implements IScreen {
     public void setupCursor(int x, int y, int w, int h, int[] pixels) {
         mouseCenterX = x;
         mouseCenterY = y;
-        mouseW = w;
-        mouseH = h;
         mouseBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
         if (mouseBitmap != null) {
             for (int yA = 0; yA < h; yA++) {
@@ -200,7 +190,6 @@ public class AndroidScreen implements IScreen {
                         int y = update.y;
                         int w = update.width;
                         int h = update.height;
-                        Logger.logger.printLn(update.getClass().toString() + " x:" + x + " y:" + y + " w:" + w + " h:" + h);
 
                         try {
                             int width = update.width;
@@ -232,38 +221,6 @@ public class AndroidScreen implements IScreen {
             });
             t.start();*/
         }
-    }
-
-    public void fpsCounter() {
-        /*if (last == 0) {
-            last = System.currentTimeMillis();
-        }
-        long now = System.currentTimeMillis();
-        if (delta > 1000) {
-            delta -= 1000;
-            fps = 0;
-        } else {
-            delta += now - last;
-        }
-        last = now;
-        fps++;
-        Canvas c = new Canvas(bitmap);
-        Paint paint = new Paint();
-        Paint font = new Paint();
-
-        paint.setColor(Color.WHITE); // Back Color
-        font.setColor(Color.BLACK); // Text Color
-
-        paint.setStrokeWidth(12);
-        font.setStrokeWidth(12); // Text Size
-        font.setTextSize(30f);
-
-        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_OVER));
-        font.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_OVER));
-
-        c.drawRect(100, 25, 200, 50, paint);
-        c.drawText("FPS: " + fps, 100, 50, font);
-        System.out.println(fps);*/
     }
 
 }

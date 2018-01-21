@@ -16,6 +16,7 @@ import uk.co.mholeys.vnc.display.UpdateManager;
 
 /**
  * Created by Matthew on 30/07/2017.
+ * Vnc interface for when
  */
 
 public class CastInterface implements IUserInterface {
@@ -23,14 +24,14 @@ public class CastInterface implements IUserInterface {
 
     private final CastPresentationService.VNCPresentation presentation;
     public AndroidDisplay display;
-    AndroidScreen screen;
+    private AndroidScreen screen;
     private UpdateManager updateManager;
-    Context context;
-    AndroidKeyboard keyboard = new AndroidKeyboard();
-    AndroidMouse mouse = new AndroidMouse(this);
+    private Context context;
+    private AndroidKeyboard keyboard = new AndroidKeyboard();
+    private AndroidMouse mouse = new AndroidMouse(this);
     public int androidWidth;
     public int androidHeight;
-    public PixelFormat format;
+    private PixelFormat format;
 
     public CastInterface(CastPresentationService.VNCPresentation presentation, AndroidDisplay display) {
         this.presentation = presentation;
@@ -81,7 +82,7 @@ public class CastInterface implements IUserInterface {
             screen = new AndroidScreen(width, height);
         }
         display.screen = screen;
-        //FIXME display.mouse = mouse;
+        //FIXME attach mouse display.mouse = mouse;
 
         mouse.mouseScaleW = (double)width / (double) androidWidth;
         mouse.mouseScaleH = (double)height / (double) androidHeight;

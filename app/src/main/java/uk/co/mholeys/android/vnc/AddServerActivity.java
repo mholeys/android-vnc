@@ -10,7 +10,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
 
-import uk.co.mholeys.android.vnc.data.SQLHelper;
+import uk.co.mholeys.android.vnc.data.ServerDataSQLHelper;
 
 public class AddServerActivity extends AppCompatActivity {
 
@@ -25,6 +25,7 @@ public class AddServerActivity extends AppCompatActivity {
         setContentView(R.layout.activity_add_server);
         setTitle(R.string.title_activity_add_server);
 
+        // Get the input boxes for extracting entered values
         mName = findViewById(R.id.server_name_text);
         mAddress = findViewById(R.id.server_address_text);
         mPort = findViewById(R.id.server_port_text);
@@ -37,14 +38,14 @@ public class AddServerActivity extends AppCompatActivity {
         String address = mAddress.getText().toString();
         int port = Integer.parseInt(mPort.getText().toString());
         String password = mPassword.getText().toString();
-        SQLiteDatabase db = new SQLHelper(this).getWritableDatabase();
+        SQLiteDatabase db = new ServerDataSQLHelper(this).getWritableDatabase();
         db.beginTransaction();
         ContentValues values = new ContentValues();
-        values.put(SQLHelper.SERVER_COLUMN_NAME, name);
-        values.put(SQLHelper.SERVER_COLUMN_ADDRESS, address);
-        values.put(SQLHelper.SERVER_COLUMN_PORT, port);
-        values.put(SQLHelper.SERVER_COLUMN_PASSWORD, password);
-        long newRowId = db.insert(SQLHelper.SERVERS_TABLE_NAME, null, values);
+        values.put(ServerDataSQLHelper.SERVER_COLUMN_NAME, name);
+        values.put(ServerDataSQLHelper.SERVER_COLUMN_ADDRESS, address);
+        values.put(ServerDataSQLHelper.SERVER_COLUMN_PORT, port);
+        values.put(ServerDataSQLHelper.SERVER_COLUMN_PASSWORD, password);
+        long newRowId = db.insert(ServerDataSQLHelper.SERVERS_TABLE_NAME, null, values);
         db.setTransactionSuccessful();
         db.endTransaction();
         db.close();

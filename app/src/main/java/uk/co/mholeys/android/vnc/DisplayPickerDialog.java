@@ -25,6 +25,7 @@ import java.util.ListIterator;
 
 /**
  * Created by Matthew on 12/01/2018.
+ * Dialog for displaying options for output device selection
  */
 
 public class DisplayPickerDialog extends Dialog {

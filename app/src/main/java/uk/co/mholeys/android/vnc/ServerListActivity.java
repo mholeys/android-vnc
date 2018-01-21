@@ -27,15 +27,13 @@ import android.widget.Toast;
 
 import com.google.android.gms.cast.CastDevice;
 import com.google.android.gms.cast.CastMediaControlIntent;
-import com.google.android.gms.cast.CastRemoteDisplay;
 import com.google.android.gms.cast.CastRemoteDisplayLocalService;
 import com.google.android.gms.common.api.Status;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
-import uk.co.mholeys.android.vnc.data.SQLHelper;
+import uk.co.mholeys.android.vnc.data.ServerDataSQLHelper;
 import uk.co.mholeys.android.vnc.data.ServerEntry;
 
 import static android.support.v7.media.MediaRouter.*;
@@ -183,10 +181,10 @@ public class ServerListActivity extends AppCompatActivity {
 
     public void deleteServer(ServerEntry server) {
         listItems.remove(server);
-        SQLiteDatabase db = new SQLHelper(this).getWritableDatabase();
+        SQLiteDatabase db = new ServerDataSQLHelper(this).getWritableDatabase();
         db.beginTransaction();
-        db.delete(SQLHelper.SERVERS_TABLE_NAME,
-                SQLHelper.SERVER_COLUMN_ID + "=?",
+        db.delete(ServerDataSQLHelper.SERVERS_TABLE_NAME,
+                ServerDataSQLHelper.SERVER_COLUMN_ID + "=?",
                 new String[] {""+server.dbID});
         db.setTransactionSuccessful();
         db.endTransaction();
@@ -346,28 +344,28 @@ public class ServerListActivity extends AppCompatActivity {
     }
 
     private void loadServers() {
-        SQLiteDatabase db = new SQLHelper(this).getReadableDatabase();
+        SQLiteDatabase db = new ServerDataSQLHelper(this).getReadableDatabase();
 
         db.beginTransaction();
 /*        String[] projection = {
-                SQLHelper.SERVER_COLUMN_ID,
-                SQLHelper.SERVER_COLUMN_NAME,
-                SQLHelper.SERVER_COLUMN_ADDRESS,
-                SQLHelper.SERVER_COLUMN_PORT,
-                SQLHelper.SERVER_COLUMN_PASSWORD
+                ServerDataSQLHelper.SERVER_COLUMN_ID,
+                ServerDataSQLHelper.SERVER_COLUMN_NAME,
+                ServerDataSQLHelper.SERVER_COLUMN_ADDRESS,
+                ServerDataSQLHelper.SERVER_COLUMN_PORT,
+                ServerDataSQLHelper.SERVER_COLUMN_PASSWORD
         };*/
 
-        Cursor cursor = db.rawQuery("select * from " + SQLHelper.SERVERS_TABLE_NAME + " ORDER BY " + SQLHelper.SERVER_COLUMN_NAME + " ASC", null);
+        Cursor cursor = db.rawQuery("select * from " + ServerDataSQLHelper.SERVERS_TABLE_NAME + " ORDER BY " + ServerDataSQLHelper.SERVER_COLUMN_NAME + " ASC", null);
 
         listItems.clear();
 
         if (cursor.moveToFirst()) {
             while (!cursor.isAfterLast()) {
-                int id = cursor.getInt(cursor.getColumnIndex(SQLHelper.SERVER_COLUMN_ID));
-                String name = cursor.getString(cursor.getColumnIndex(SQLHelper.SERVER_COLUMN_NAME));
-                String address = cursor.getString(cursor.getColumnIndex(SQLHelper.SERVER_COLUMN_ADDRESS));
-                int port = cursor.getInt(cursor.getColumnIndex(SQLHelper.SERVER_COLUMN_PORT));
-                String password = cursor.getString(cursor.getColumnIndex(SQLHelper.SERVER_COLUMN_PASSWORD));
+                int id = cursor.getInt(cursor.getColumnIndex(ServerDataSQLHelper.SERVER_COLUMN_ID));
+                String name = cursor.getString(cursor.getColumnIndex(ServerDataSQLHelper.SERVER_COLUMN_NAME));
+                String address = cursor.getString(cursor.getColumnIndex(ServerDataSQLHelper.SERVER_COLUMN_ADDRESS));
+                int port = cursor.getInt(cursor.getColumnIndex(ServerDataSQLHelper.SERVER_COLUMN_PORT));
+                String password = cursor.getString(cursor.getColumnIndex(ServerDataSQLHelper.SERVER_COLUMN_PASSWORD));
 
                 ServerData sd = new ServerData();
                 sd.name = name;

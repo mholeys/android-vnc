@@ -18,19 +18,23 @@ import uk.co.mholeys.vnc.display.UpdateManager;
 
 /**
  * Created by Matthew on 25/09/2016.
+ * VNC interface for managing and holding access to all needed components
  */
 public class AndroidInterface implements IUserInterface {
 
     private static final String TAG = "AndInterface";
+    // Canvas/View being drawn
     public AndroidDisplay display;
-    AndroidScreen screen;
+    // Controller for drawing to the display's canvas and manging how things are drawn
+    private AndroidScreen screen;
+    // Queue for updates
     private UpdateManager updateManager;
-    Context context;
-    AndroidKeyboard keyboard = new AndroidKeyboard();
-    AndroidMouse2 mouse = new AndroidMouse2(this);
+    private Context context;
+    private AndroidKeyboard keyboard = new AndroidKeyboard();
+    private AndroidMouse2 mouse = new AndroidMouse2(this);
     public int androidWidth;
     public int androidHeight;
-    public PixelFormat format;
+    private PixelFormat format;
 
     public AndroidInterface(Context context, AndroidDisplay display) {
         this.context = context;
@@ -74,14 +78,18 @@ public class AndroidInterface implements IUserInterface {
 
     @Override
     public void setSize(int width, int height) {
+        // Create the screen if we dont already have one
         if (screen != null) {
             screen.setSize(width, height);
         } else {
+            // Or just update the screen with the new size
             screen = new AndroidScreen(width, height);
         }
+        // Attach the mouse and screen
         display.screen = screen;
         display.mouse = mouse;
 
+        // Work out the orientation and scale for the mouse input
         int orientation = context.getResources().getConfiguration().orientation;
         double wS = 1, hS = 1;
         if (androidWidth == 0 || androidHeight == 0) {

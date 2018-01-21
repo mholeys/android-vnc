@@ -11,6 +11,7 @@ import com.google.android.gms.cast.CastRemoteDisplayLocalService;
 
 /**
  * Created by Matthew on 17/12/2017.
+ * Activity to capture user input directly, for use with a chromecast device as the output
  */
 
 public class CastInputActivity extends InputActivity {

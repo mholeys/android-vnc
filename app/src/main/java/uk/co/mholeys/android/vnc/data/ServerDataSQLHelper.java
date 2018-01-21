@@ -9,9 +9,10 @@ import uk.co.mholeys.android.vnc.ServerData;
 
 /**
  * Created by Matthew on 02/04/2017.
+ * Helper class, to save/fetch saved servers from the database on the device.
  */
 
-public class SQLHelper extends SQLiteOpenHelper {
+public class ServerDataSQLHelper extends SQLiteOpenHelper {
 
     private static final int DATABASE_VERSION = 2;
     public static final String DATABASE_NAME = "server_database";
@@ -22,13 +23,14 @@ public class SQLHelper extends SQLiteOpenHelper {
     public static final String SERVER_COLUMN_PORT = "port";
     public static final String SERVER_COLUMN_PASSWORD = "password";
 
-    public SQLHelper(Context context) {
+    public ServerDataSQLHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
 
     @Override
     public void onCreate(SQLiteDatabase db) {
+        // Creates the database when needed
         db.execSQL("CREATE TABLE " + SERVERS_TABLE_NAME + " (" +
                 SERVER_COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 SERVER_COLUMN_NAME + " TEXT, " +
