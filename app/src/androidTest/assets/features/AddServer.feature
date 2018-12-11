@@ -1,6 +1,6 @@
 Feature: AddServer
   Add a server to a server list
-  
+
   Scenario: Access add from action bar, and back
     Given I am on the ServerListActivity
     When I press add in the action bar
@@ -37,6 +37,7 @@ Feature: AddServer
 #    And I fill in password with <password>
 #    And I press Add
 #    Then I should see the ServerListActivity
+#    # Then I should see Port not valid
 #    Then ServerList should contain a server with "<name>" "<address>" "<port>"
 #    # TODO: change to failure
 #

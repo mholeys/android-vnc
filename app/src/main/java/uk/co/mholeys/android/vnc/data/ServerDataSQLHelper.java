@@ -35,7 +35,7 @@ public class ServerDataSQLHelper extends SQLiteOpenHelper {
                 SERVER_COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 SERVER_COLUMN_NAME + " TEXT, " +
                 SERVER_COLUMN_ADDRESS + " TEXT," +
-                SERVER_COLUMN_PORT + " INT UNSIGNED, " +
+                SERVER_COLUMN_PORT + " INT, " +
                 SERVER_COLUMN_PASSWORD + " TEXT" + ")");
     }
 
@@ -44,5 +44,4 @@ public class ServerDataSQLHelper extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + SERVERS_TABLE_NAME);
         onCreate(db);
     }
-
 }

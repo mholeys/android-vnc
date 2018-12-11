@@ -35,6 +35,7 @@ import static android.support.test.runner.lifecycle.Stage.RESUMED;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
+import static junit.framework.Assert.fail;
 import static org.hamcrest.Matchers.anything;
 
 /**
@@ -93,38 +94,13 @@ public class ServerListActivitySteps {
         assertTrue(activity instanceof ServerListActivity);
     }
 
-    @When("^I press (\\S+) in the (.*)$")
-    public void I_press_x_in_y(String item, String container) {
-        switch (container.toLowerCase()) {
-            case "action bar":
-                switch (item) {
-                    case "add":
-                        onView(withId(R.id.add_server_action_bar_button)).perform(click());
-                        break;
-                }
-                break;
-            case "server list":
-                switch (item) {
-                }
-                break;
-            default:
-                onView(withText(item));
-                break;
-        }
-
-    }
-
-    @When("^I long press (\\S+) in the (.*)$")
-    public void I_long_press_x_in_y(String item, String container) {
-
-    }
-
-    @Then("^ServerList should contain a server with \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\"")
-    public void server_list_has_server(String name, String address, String port) {
+    @Then("^ServerList should( | not )contain a server with \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\"")
+    public void server_list_has_server(String not, String name, String address, String port) {
         ServerListActivity activity = (ServerListActivity) getActivity();
         ListView list = (ListView) activity.findViewById(R.id.server_list_view);
         ListAdapter la = list.getAdapter();
         int i = -1;
+        boolean found = false;
         for (i = 0; i < list.getCount(); i++) {
             ServerEntry se = (ServerEntry) la.getItem(i);
             ServerData sd = se.serverData;
@@ -141,6 +117,13 @@ public class ServerListActivitySteps {
                 onData(anything())
                         .inAdapterView(withId(R.id.server_list_view)).atPosition(i)
                         .check(matches(isDisplayed()));
+                found = true;
+            }
+        }
+        // Ensure not == "not"
+        if (not != null && !not.trim().equals("") && not.trim().toLowerCase().equals("not")) {
+            if (found) {
+                fail("Found server entry that should not be in the list " + name + " " + address + " " + port);
             }
         }
     }

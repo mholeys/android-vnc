@@ -9,6 +9,7 @@ import android.view.View;
 import android.widget.Button;
 
 import org.hamcrest.Matchers;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.TestRule;
 import org.junit.rules.TestWatcher;
@@ -22,6 +23,7 @@ import cucumber.api.java.After;
 import cucumber.api.java.en.When;
 import uk.co.mholeys.android.vnc.*;
 import uk.co.mholeys.android.vnc.R;
+import uk.co.mholeys.android.vnc.data.ServerDataSQLHelper;
 
 import static android.support.test.InstrumentationRegistry.getInstrumentation;
 import static android.support.test.InstrumentationRegistry.getTargetContext;
@@ -33,6 +35,7 @@ import static android.support.test.espresso.action.ViewActions.longClick;
 import static android.support.test.espresso.action.ViewActions.scrollTo;
 import static android.support.test.espresso.action.ViewActions.typeText;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
+import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static android.support.test.espresso.matcher.ViewMatchers.isRoot;
 import static android.support.test.espresso.matcher.ViewMatchers.withChild;
 import static android.support.test.espresso.matcher.ViewMatchers.withClassName;
@@ -71,11 +74,6 @@ public class CommonSteps {
 
     @When("^I press (\\S+)$")
     public void I_press_x(String item) {
-        /*switch (item) {
-            case "Add":
-                onView(withId(uk.co.mholeys.android.vnc.R.id.add_server_action_bar_button)).perform(click());
-                break;
-        }*/
         onView(withText(equalToIgnoringCase(item))).perform(closeSoftKeyboard()).perform(click());
     }
 
@@ -99,6 +97,45 @@ public class CommonSteps {
             UiDevice device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
             String filename = scenario.getId() + "." + scenario.getName() + ".png";
             device.takeScreenshot(new File(path, filename));
+        }
+    }
+
+    @When("^I press (\\S+) in the (.*)$")
+    public void I_press_x_in_y(String item, String container) {
+        switch (container.toLowerCase()) {
+            case "action bar":
+                switch (item) {
+                    case "add":
+                        onView(withId(R.id.add_server_action_bar_button)).perform(click());
+                        break;
+                }
+                break;
+            case "server list":
+                onView(withText(item)).perform(closeSoftKeyboard()).perform(scrollTo()).perform(click());
+                break;
+            default:
+                onView(withText(item));
+                break;
+        }
+
+    }
+
+    @When("^I long press (\\S+) in the (.*)$")
+    public void I_long_press_x_in_y(String item, String container) {
+        switch (container.toLowerCase()) {
+            case "action bar":
+                switch (item) {
+                    case "add":
+                        onView(withId(R.id.add_server_action_bar_button)).perform(longClick());
+                        break;
+                }
+                break;
+            case "server list":
+                onView(withText(item)).perform(closeSoftKeyboard()).perform(scrollTo()).perform(longClick());
+                break;
+            default:
+                onView(withText(item));
+                break;
         }
     }
 
